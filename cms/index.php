@@ -434,7 +434,6 @@ $config = [
       </div>
 
       <div class="topbar-right">
-        <button v-if="!['settings','settings-api','settings-languages','settings-projects','settings-team','database','about'].includes(route.kind)" class="button ghost api-button" type="button" @click="drawer = route.kind==='form' ? 'form-api' : 'api'"><i class="bi bi-braces"></i> API</button>
         <button class="avatar-button" type="button" @click.stop="toggleUserMenu">
           <span class="avatar">{{ initials }}</span><span class="user-name">{{ state.user?.name || 'Администратор' }}</span><i class="bi bi-chevron-down chevron"></i>
         </button>
