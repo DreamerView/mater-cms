@@ -165,7 +165,7 @@ if (!Database::installed()) {
           <meta name="theme-color" content="#f5f6f8">
           <title>Установка MaterCMS</title>
           <link rel="icon" type="image/png" sizes="64x64" href="<?=e(asset_url('assets/branding/matercms-icon-light-64.png'))?>"><link rel="apple-touch-icon" href="<?=e(asset_url('assets/branding/matercms-icon-light-192.png'))?>"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-          <link rel="stylesheet" href="<?=e(asset_url('assets/admin.css'))?>">
+          <link rel="stylesheet" href="<?=e(asset_url('assets/admin.css'))?>"><script defer src="<?=e(asset_url('assets/ui.js'))?>"></script>
         </head>
         <body class="installer-body">
           <main class="installer-shell <?= $databaseConfigured ? 'admin-step' : 'database-step' ?>">
@@ -223,7 +223,7 @@ if (!Database::installed()) {
                       <label>Порт<input name="db_port" inputmode="numeric" value="<?=e($_POST['db_port']??'')?>" placeholder="Автоматически"></label>
                       <label class="span-2">База данных<input name="db_name" value="<?=e($_POST['db_name']??'')?>" autocomplete="off" placeholder="matercms"></label>
                       <label>Пользователь<input name="db_user" value="<?=e($_POST['db_user']??'')?>" autocomplete="username"></label>
-                      <label>Пароль<input type="password" name="db_password" autocomplete="new-password"></label>
+                      <label>Пароль<div class="password-control"><input data-password-input type="password" name="db_password" autocomplete="new-password"><button class="password-toggle" data-password-toggle type="button" aria-label="Показать пароль" aria-pressed="false" title="Показать пароль"><i class="bi bi-eye"></i></button></div></label>
                     </div>
                     <label class="pgsql-ssl-field">SSL PostgreSQL<select name="db_sslmode"><option value="prefer">Prefer</option><option value="require">Require</option><option value="disable">Disable</option></select></label>
                   </div>
@@ -252,7 +252,7 @@ if (!Database::installed()) {
                 <div class="installer-field-grid">
                   <label class="span-2">Ваше имя<input name="name" required value="<?=e($_POST['name']??'Администратор')?>" autocomplete="name"></label>
                   <label class="span-2">Email<input type="email" name="email" required value="<?=e($_POST['email']??'')?>" autocomplete="email"></label>
-                  <label class="span-2">Пароль<input type="password" name="password" minlength="8" required placeholder="Минимум 8 символов" autocomplete="new-password"></label>
+                  <label class="span-2">Пароль<div class="password-control"><input data-password-input type="password" name="password" minlength="8" required placeholder="Минимум 8 символов" autocomplete="new-password"><button class="password-toggle" data-password-toggle type="button" aria-label="Показать пароль" aria-pressed="false" title="Показать пароль"><i class="bi bi-eye"></i></button></div></label>
                 </div>
                 <button class="button primary installer-primary" type="submit"><i class="bi bi-stars"></i> Установить MaterCMS</button>
               </form>
@@ -290,7 +290,7 @@ if (!$user) {
 
     if (!$user) {
         ?><!doctype html>
-        <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="light dark"><meta name="theme-color" content="#f5f6f8"><script>(()=>{try{const m=localStorage.getItem('matercms-theme') || localStorage.getItem('mater-theme') || localStorage.getItem('feather-theme') || 'system';const d=m==='dark'||(m==='system'&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.dataset.theme=d?'dark':'light';document.documentElement.dataset.themeMode=m;document.querySelector('meta[name=\"theme-color\"]')?.setAttribute('content',d?'#0f1115':'#f5f6f8');}catch(e){}})();</script><title>Вход — MaterCMS</title><link rel="icon" type="image/png" sizes="64x64" href="<?=e(asset_url('assets/branding/matercms-icon-light-64.png'))?>"><link rel="apple-touch-icon" href="<?=e(asset_url('assets/branding/matercms-icon-light-192.png'))?>"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"><link rel="stylesheet" href="<?=e(asset_url('assets/admin.css'))?>"></head>
+        <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="light dark"><meta name="theme-color" content="#f5f6f8"><script>(()=>{try{const m=localStorage.getItem('matercms-theme') || localStorage.getItem('mater-theme') || localStorage.getItem('feather-theme') || 'system';const d=m==='dark'||(m==='system'&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.dataset.theme=d?'dark':'light';document.documentElement.dataset.themeMode=m;document.querySelector('meta[name=\"theme-color\"]')?.setAttribute('content',d?'#0f1115':'#f5f6f8');}catch(e){}})();</script><title>Вход — MaterCMS</title><link rel="icon" type="image/png" sizes="64x64" href="<?=e(asset_url('assets/branding/matercms-icon-light-64.png'))?>"><link rel="apple-touch-icon" href="<?=e(asset_url('assets/branding/matercms-icon-light-192.png'))?>"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"><link rel="stylesheet" href="<?=e(asset_url('assets/admin.css'))?>"><script defer src="<?=e(asset_url('assets/ui.js'))?>"></script></head>
         <body class="auth-body">
           <main class="auth-shell">
             <section class="auth-product-panel">
@@ -313,7 +313,7 @@ if (!$user) {
               <?php if($loginError):?><div class="auth-error"><i class="bi bi-exclamation-circle-fill"></i><span><?=e($loginError)?></span></div><?php endif;?>
               <form method="post" class="auth-form"><?=csrf_field()?><input type="hidden" name="action" value="login">
                 <label><span>Email</span><div class="auth-input-wrap"><i class="bi bi-envelope"></i><input type="email" name="email" required autofocus autocomplete="email" placeholder="name@example.com"></div></label>
-                <label><span>Пароль</span><div class="auth-input-wrap"><i class="bi bi-lock"></i><input type="password" name="password" required autocomplete="current-password" placeholder="Введите пароль"></div></label>
+                <label><span>Пароль</span><div class="auth-input-wrap auth-input-password"><i class="bi bi-lock"></i><input data-password-input type="password" name="password" required autocomplete="current-password" placeholder="Введите пароль"><button class="password-toggle" data-password-toggle type="button" aria-label="Показать пароль" aria-pressed="false" title="Показать пароль"><i class="bi bi-eye"></i></button></div></label>
                 <button class="button primary wide auth-submit" type="submit"><span>Войти</span><i class="bi bi-arrow-right"></i></button>
               </form>
               <div class="auth-login-note"><i class="bi bi-shield-check"></i><span>Сессия защищена. Данные авторизации не передаются в публичный API.</span></div>
@@ -355,7 +355,7 @@ $config = [
   <link rel="icon" type="image/png" sizes="64x64" href="<?=e(asset_url('assets/branding/matercms-icon-light-64.png'))?>">
   <link rel="apple-touch-icon" href="<?=e(asset_url('assets/branding/matercms-icon-light-192.png'))?>">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="<?=e(asset_url('assets/admin.css'))?>">
+  <link rel="stylesheet" href="<?=e(asset_url('assets/admin.css'))?>"><script defer src="<?=e(asset_url('assets/ui.js'))?>"></script>
 </head>
 <body>
 <div id="featherApp" v-cloak>
@@ -1597,7 +1597,7 @@ $config = [
             <label>Порт<input v-model.trim="databaseDialog.port" inputmode="numeric" :placeholder="databaseDialog.driver==='mysql' ? '3306' : '5432'"></label>
             <label class="span-2">База данных<input v-model.trim="databaseDialog.database" placeholder="matercms"></label>
             <label>Пользователь<input v-model="databaseDialog.username" autocomplete="username"></label>
-            <label>Пароль<input v-model="databaseDialog.password" type="password" autocomplete="new-password"></label>
+            <label>Пароль<div class="password-control"><input data-password-input v-model="databaseDialog.password" type="password" autocomplete="new-password"><button class="password-toggle" data-password-toggle type="button" aria-label="Показать пароль" aria-pressed="false" title="Показать пароль"><i class="bi bi-eye"></i></button></div></label>
             <label v-if="databaseDialog.driver==='pgsql'" class="span-2">SSL PostgreSQL<select v-model="databaseDialog.sslmode"><option value="prefer">Prefer</option><option value="require">Require</option><option value="disable">Disable</option></select></label>
           </div>
         </template>
@@ -1638,7 +1638,7 @@ $config = [
         <div class="user-access-fields">
           <label>Имя<input v-model.trim="userDialog.name" autofocus type="text" placeholder="Имя пользователя"></label>
           <label>Email<input v-model.trim="userDialog.email" type="email" placeholder="name@example.com"></label>
-          <label class="span-2">{{ userDialog.id ? 'Новый пароль (необязательно)' : 'Пароль' }}<input v-model="userDialog.password" type="password" :required="!userDialog.id" minlength="8" placeholder="Минимум 8 символов"></label>
+          <label class="span-2">{{ userDialog.id ? 'Новый пароль (необязательно)' : 'Пароль' }}<div class="password-control"><input data-password-input v-model="userDialog.password" type="password" :required="!userDialog.id" minlength="8" placeholder="Минимум 8 символов"><button class="password-toggle" data-password-toggle type="button" aria-label="Показать пароль" aria-pressed="false" title="Показать пароль"><i class="bi bi-eye"></i></button></div></label>
         </div>
         <div class="user-project-management-note"><span><i class="bi bi-layers-fill"></i></span><div><strong>Доступ настраивается в проектах</strong><p>После создания пользователя откройте «Настройки → Проекты», выберите нужный проект и назначьте роль и права.</p></div></div>
         <div class="modal-actions user-access-modal-actions"><button class="button ghost" type="button" @click="modal=null">Отмена</button><button class="button primary" :disabled="busy" type="submit">{{ userDialog.id ? 'Сохранить' : 'Создать пользователя' }}</button></div>

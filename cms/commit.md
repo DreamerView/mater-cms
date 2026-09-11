@@ -1,1 +1,1 @@
-chore(git): keep commit message in root and cms
+feat(ui): add password visibility toggles across MaterCMS
