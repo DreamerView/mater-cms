@@ -165,7 +165,7 @@ if (!Database::installed()) {
           <meta name="theme-color" content="#f5f6f8">
           <title>Установка MaterCMS</title>
           <link rel="icon" type="image/png" sizes="64x64" href="<?=e(asset_url('assets/branding/matercms-icon-light-64.png'))?>"><link rel="apple-touch-icon" href="<?=e(asset_url('assets/branding/matercms-icon-light-192.png'))?>"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-          <link rel="stylesheet" href="<?=e(asset_url('assets/admin.css'))?>"><script defer src="<?=e(asset_url('assets/ui.js'))?>"></script>
+          <link rel="stylesheet" href="<?=e(asset_url('assets/admin.css'))?>"><script src="<?=e(asset_url('assets/ui.js'))?>"></script>
         </head>
         <body class="installer-body">
           <main class="installer-shell <?= $databaseConfigured ? 'admin-step' : 'database-step' ?>">
@@ -290,7 +290,7 @@ if (!$user) {
 
     if (!$user) {
         ?><!doctype html>
-        <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="light dark"><meta name="theme-color" content="#f5f6f8"><script>(()=>{try{const m=localStorage.getItem('matercms-theme') || localStorage.getItem('mater-theme') || localStorage.getItem('feather-theme') || 'system';const d=m==='dark'||(m==='system'&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.dataset.theme=d?'dark':'light';document.documentElement.dataset.themeMode=m;document.querySelector('meta[name=\"theme-color\"]')?.setAttribute('content',d?'#0f1115':'#f5f6f8');}catch(e){}})();</script><title>Вход — MaterCMS</title><link rel="icon" type="image/png" sizes="64x64" href="<?=e(asset_url('assets/branding/matercms-icon-light-64.png'))?>"><link rel="apple-touch-icon" href="<?=e(asset_url('assets/branding/matercms-icon-light-192.png'))?>"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"><link rel="stylesheet" href="<?=e(asset_url('assets/admin.css'))?>"><script defer src="<?=e(asset_url('assets/ui.js'))?>"></script></head>
+        <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="light dark"><meta name="theme-color" content="#f5f6f8"><script>(()=>{try{const m=localStorage.getItem('matercms-theme') || localStorage.getItem('mater-theme') || localStorage.getItem('feather-theme') || 'system';const d=m==='dark'||(m==='system'&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.dataset.theme=d?'dark':'light';document.documentElement.dataset.themeMode=m;document.querySelector('meta[name=\"theme-color\"]')?.setAttribute('content',d?'#0f1115':'#f5f6f8');}catch(e){}})();</script><title>Вход — MaterCMS</title><link rel="icon" type="image/png" sizes="64x64" href="<?=e(asset_url('assets/branding/matercms-icon-light-64.png'))?>"><link rel="apple-touch-icon" href="<?=e(asset_url('assets/branding/matercms-icon-light-192.png'))?>"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"><link rel="stylesheet" href="<?=e(asset_url('assets/admin.css'))?>"><script src="<?=e(asset_url('assets/ui.js'))?>"></script></head>
         <body class="auth-body">
           <main class="auth-shell">
             <section class="auth-product-panel">
@@ -355,7 +355,7 @@ $config = [
   <link rel="icon" type="image/png" sizes="64x64" href="<?=e(asset_url('assets/branding/matercms-icon-light-64.png'))?>">
   <link rel="apple-touch-icon" href="<?=e(asset_url('assets/branding/matercms-icon-light-192.png'))?>">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <link rel="stylesheet" href="<?=e(asset_url('assets/admin.css'))?>"><script defer src="<?=e(asset_url('assets/ui.js'))?>"></script>
+  <link rel="stylesheet" href="<?=e(asset_url('assets/admin.css'))?>"><script src="<?=e(asset_url('assets/ui.js'))?>"></script>
 </head>
 <body>
 <div id="featherApp" v-cloak>
@@ -925,7 +925,6 @@ $config = [
 
               <div class="content-command-group" aria-label="Действия с объектами">
                 <button type="button" :disabled="!contentSelectionCount" @click="setContentClipboard(null,null,'copy')" title="Копировать · Ctrl+C"><i class="bi bi-copy"></i><span>Копировать</span></button>
-                <button type="button" :disabled="!can('content.edit') || !contentSelectionCount" @click="setContentClipboard(null,null,'cut')" title="Вырезать · Ctrl+X"><i class="bi bi-scissors"></i><span>Вырезать</span></button>
                 <button type="button" :disabled="!can('content.edit') || !contentClipboardCount || clipboardBusy" @click="pasteContent(route.folderId)" title="Вставить · Ctrl+V"><i class="bi bi-clipboard-check"></i><span>Вставить</span><b v-if="contentClipboardCount">{{ contentClipboardCount }}</b></button>
                 <button type="button" :disabled="!can('content.edit') || !contentSelectionCount || clipboardBusy" @click="duplicateSelection" title="Создать копию · Ctrl+D"><i class="bi bi-files"></i><span>Копия</span></button>
                 <button type="button" :disabled="!can('content.edit') || contentSelectionCount!==1 || selectedSingleContent?.type==='resource-link'" @click="renameSelectedContent" title="Переименовать · F2"><i class="bi bi-pencil"></i><span>Переименовать</span></button>
@@ -963,7 +962,7 @@ $config = [
           </div>
 
           <div v-if="filteredFolders.length || filteredDocuments.length || filteredContentLinks.length" class="files content-files" :class="[viewMode,{'drag-over-root':contentDrag.active && contentDrag.overFolderId===route.folderId}]" @click.self="clearContentSelection" @dragover="contentDragOver($event,route.folderId)" @drop="dropContent($event,route.folderId)">
-            <article v-for="folder in filteredFolders" :key="'f'+folder.id" :data-content-key="'folder:'+folder.id" class="file-card folder-card" :class="{selected:isContentSelected('folder',folder),'clipboard-cut':isContentCut('folder',folder),'drag-target':contentDrag.active && contentDrag.overFolderId===folder.id}" draggable="true" @dragstart="startContentDrag($event,'folder',folder)" @dragend="endContentDrag" @dragover.stop="contentDragOver($event,folder.id)" @dragleave="contentDragLeave" @drop.stop="dropContent($event,folder.id)" @dblclick="openFolder(folder.id)" @contextmenu.prevent.stop="openObjectContext($event,'folder',folder)">
+            <article v-for="folder in filteredFolders" :key="'f'+folder.id" :data-content-key="'folder:'+folder.id" class="file-card folder-card" :class="{selected:isContentSelected('folder',folder),'drag-target':contentDrag.active && contentDrag.overFolderId===folder.id}" draggable="true" @dragstart="startContentDrag($event,'folder',folder)" @dragend="endContentDrag" @dragover.stop="contentDragOver($event,folder.id)" @dragleave="contentDragLeave" @drop.stop="dropContent($event,folder.id)" @dblclick="openFolder(folder.id)" @contextmenu.prevent.stop="openObjectContext($event,'folder',folder)">
               <button class="card-open" type="button" @click="activateContentItem($event,'folder',folder)" :aria-label="'Выбрать ' + folder.name + '. Двойной клик — открыть'"></button>
               <span class="file-select-mark"><i class="bi bi-check2"></i></span>
               <div class="file-icon folder"><i class="bi bi-folder-fill"></i></div>
@@ -972,7 +971,7 @@ $config = [
               <button class="more-button" type="button" @click.stop="openMenu($event,'folder',folder)" aria-label="Действия"><i class="bi bi-three-dots"></i></button>
             </article>
 
-            <article v-for="doc in filteredDocuments" :key="'d'+doc.id" :data-content-key="'document:'+doc.id" class="file-card document-card" :class="{selected:isContentSelected('document',doc),'clipboard-cut':isContentCut('document',doc)}" draggable="true" @dragstart="startContentDrag($event,'document',doc)" @dragend="endContentDrag" @dblclick="openDocument(doc.id)" @contextmenu.prevent.stop="openObjectContext($event,'document',doc)">
+            <article v-for="doc in filteredDocuments" :key="'d'+doc.id" :data-content-key="'document:'+doc.id" class="file-card document-card" :class="{selected:isContentSelected('document',doc)}" draggable="true" @dragstart="startContentDrag($event,'document',doc)" @dragend="endContentDrag" @dblclick="openDocument(doc.id)" @contextmenu.prevent.stop="openObjectContext($event,'document',doc)">
               <button class="card-open" type="button" @click="activateContentItem($event,'document',doc)" :aria-label="'Выбрать ' + doc.name + '. Двойной клик — открыть'"></button>
               <span class="file-select-mark"><i class="bi bi-check2"></i></span>
               <div class="file-icon document"><i class="bi bi-file-earmark-text-fill"></i></div>
@@ -981,7 +980,7 @@ $config = [
               <button class="more-button" type="button" @click.stop="openMenu($event,'document',doc)" aria-label="Действия"><i class="bi bi-three-dots"></i></button>
             </article>
 
-            <article v-for="link in filteredContentLinks" :key="'l'+link.id" :data-content-key="'resource-link:'+link.id" class="file-card resource-link-card" :class="['resource-'+link.resource_type,{selected:isContentSelected('resource-link',link),'clipboard-cut':isContentCut('resource-link',link)}]" draggable="true" @dragstart="startContentDrag($event,'resource-link',link)" @dragend="endContentDrag" @dblclick="openLinkedResource(link)" @contextmenu.prevent.stop="openObjectContext($event,'resource-link',link)">
+            <article v-for="link in filteredContentLinks" :key="'l'+link.id" :data-content-key="'resource-link:'+link.id" class="file-card resource-link-card" :class="['resource-'+link.resource_type,{selected:isContentSelected('resource-link',link)}]" draggable="true" @dragstart="startContentDrag($event,'resource-link',link)" @dragend="endContentDrag" @dblclick="openLinkedResource(link)" @contextmenu.prevent.stop="openObjectContext($event,'resource-link',link)">
               <button class="card-open" type="button" @click="activateContentItem($event,'resource-link',link)" :aria-label="'Выбрать ' + link.name + '. Двойной клик — открыть источник'"></button>
               <span class="file-select-mark"><i class="bi bi-check2"></i></span>
               <div class="file-icon resource-link-icon" :class="link.resource_type"><i class="bi" :class="link.resource_type==='form' ? 'bi-ui-checks-grid' : 'bi-database-fill'"></i></div>
@@ -1001,7 +1000,7 @@ $config = [
 
           <div class="content-browser-meta">
             <span>{{ contentVisibleCount }} {{ plural(contentVisibleCount,'элемент','элемента','элементов') }}</span>
-            <span v-if="contentClipboardCount" class="clipboard-state"><i class="bi" :class="contentClipboard?.operation==='cut'?'bi-scissors':'bi-copy'"></i>{{ contentClipboardCount }} {{ plural(contentClipboardCount,'объект','объекта','объектов') }} в буфере</span>
+            <span v-if="contentClipboardCount" class="clipboard-state"><i class="bi bi-copy"></i>{{ contentClipboardCount }} {{ plural(contentClipboardCount,'объект','объекта','объектов') }} в буфере</span>
           </div>
         </section>
         <section v-else-if="document" class="editor-view">
@@ -1145,15 +1144,28 @@ $config = [
 
   <aside v-if="drawer==='trash'" class="drawer right-drawer content-trash-drawer">
     <div class="drawer-head"><div><small class="eyebrow">МОЙ КОНТЕНТ</small><h2><i class="bi bi-trash3"></i> Корзина</h2></div><button type="button" class="close-button" @click="drawer=null"><i class="bi bi-x-lg"></i></button></div>
-    <div class="trash-toolbar"><button class="button soft" type="button" :disabled="!trashSelection.length" @click="restoreTrash"><i class="bi bi-arrow-counterclockwise"></i> Восстановить</button><button class="button ghost" type="button" :disabled="!trashSelection.length" @click="deleteTrashForever"><i class="bi bi-trash3"></i> Удалить навсегда</button><button class="button ghost trash-empty-button" type="button" :disabled="!trashItems.length" @click="emptyTrash"><i class="bi bi-x-octagon"></i> Очистить</button></div>
+    <div v-if="trashItems.length" class="trash-selection-bar">
+      <label class="trash-select-all">
+        <input type="checkbox" :checked="allTrashSelected" @change="toggleAllTrash">
+        <span class="trash-checkbox-ui"><i class="bi bi-check2"></i></span>
+        <span><b>Выбрать всё</b><small v-if="trashSelectionCount">Выбрано: {{ trashSelectionCount }}</small><small v-else>{{ trashItems.length }} {{ plural(trashItems.length,'объект','объекта','объектов') }}</small></span>
+      </label>
+    </div>
+    <div class="trash-toolbar"><button class="button soft" type="button" :disabled="!trashSelectionCount" @click="restoreTrash"><i class="bi bi-arrow-counterclockwise"></i> Восстановить<span v-if="trashSelectionCount"> · {{ trashSelectionCount }}</span></button><button class="button ghost" type="button" :disabled="!trashSelectionCount" @click="deleteTrashForever"><i class="bi bi-trash3"></i> Удалить выбранное<span v-if="trashSelectionCount"> · {{ trashSelectionCount }}</span></button><button class="button ghost trash-empty-button" type="button" :disabled="!trashItems.length" @click="emptyTrash"><i class="bi bi-x-octagon"></i> Очистить всё</button></div>
     <div v-if="trashLoading" class="files-loading"><span class="spinner"></span><p>Открываем корзину…</p></div>
     <div v-else-if="trashItems.length" class="trash-list">
-      <button v-for="item in trashItems" :key="item.id" type="button" class="trash-row" :class="{selected:trashSelection.includes(item.id)}" @click="toggleTrashSelection(item,$event)" @dblclick="restoreTrash([item.id])">
-        <span class="trash-check"><i class="bi" :class="trashSelection.includes(item.id)?'bi-check2':'bi-circle'"></i></span><span class="trash-icon"><i class="bi" :class="item.type==='folder'?'bi-folder-fill':'bi-file-earmark-text-fill'"></i></span><span class="trash-copy"><strong>{{ item.name }}</strong><small>{{ item.type==='folder'?'Папка':'Раздел' }} · {{ item.original_path }}</small><em>Удалено {{ formatDateTime(item.deleted_at) }}</em></span>
-      </button>
+      <article v-for="item in trashItems" :key="item.id" class="trash-row" :class="{selected:isTrashSelected(item)}" @dblclick="restoreTrash([item.id])">
+        <label class="trash-check" @click.stop @dblclick.stop>
+          <input type="checkbox" :checked="isTrashSelected(item)" @change="toggleTrashSelection(item)" :aria-label="'Выбрать '+item.name">
+          <span class="trash-checkbox-ui"><i class="bi bi-check2"></i></span>
+        </label>
+        <button class="trash-row-main" type="button" @click="toggleTrashSelection(item)">
+          <span class="trash-icon"><i class="bi" :class="item.type==='folder'?'bi-folder-fill':'bi-file-earmark-text-fill'"></i></span><span class="trash-copy"><strong>{{ item.name }}</strong><small>{{ item.type==='folder'?'Папка':'Раздел' }} · {{ item.original_path }}</small><em>Удалено {{ formatDateTime(item.deleted_at) }}</em></span>
+        </button>
+      </article>
     </div>
     <div v-else class="trash-empty-state"><i class="bi bi-trash"></i><h3>Корзина пуста</h3><p>Удалённые папки и разделы будут появляться здесь и их можно будет восстановить.</p></div>
-    <div class="trash-hint"><i class="bi bi-info-circle"></i><p><b>Delete</b> отправляет в корзину. <b>Shift+Delete</b> удаляет навсегда.</p></div>
+    <div class="trash-hint"><i class="bi bi-info-circle"></i><p>Отметьте нужные элементы checkbox и восстановите либо удалите навсегда только выбранные.</p></div>
   </aside>
 
   <aside v-if="drawer==='api'" class="drawer right-drawer api-drawer">

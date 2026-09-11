@@ -2110,7 +2110,6 @@ try {
     if ($action === 'paste_content') {
         ProjectAccess::requirePermission($pdo, $user, (int)$project['id'], 'content.edit');
 
-        $operation = (string)($payload['operation'] ?? 'copy') === 'cut' ? 'cut' : 'copy';
         $type = (string)($payload['item_type'] ?? '');
         $itemId = (int)($payload['item_id'] ?? 0);
         $sourceProjectId = (int)($payload['source_project_id'] ?? (int)$project['id']);
@@ -2127,12 +2126,7 @@ try {
         }
 
         $sourceProject = clipboard_accessible_project($pdo, $user, $sourceProjectId);
-        ProjectAccess::requirePermission(
-            $pdo,
-            $user,
-            (int)$sourceProject['id'],
-            $operation === 'cut' ? 'content.edit' : 'content.view'
-        );
+        ProjectAccess::requirePermission($pdo, $user, (int)$sourceProject['id'], 'content.view');
         $destinationFolderId = ProjectAccess::actualFolderId($project, $destinationUiId);
 
         $pdo->beginTransaction();
@@ -2147,69 +2141,22 @@ try {
                     throw new RuntimeException('Исходная папка не найдена.');
                 }
                 if (clipboard_folder_contains($pdo, $itemId, $destinationFolderId)) {
-                    throw new RuntimeException('Нельзя вставить папку внутрь самой себя или её вложенной папки.');
+                    throw new RuntimeException('Нельзя копировать папку внутрь самой себя или её вложенной папки.');
                 }
-
-                $sourceStmt = $pdo->prepare('SELECT parent_id,name FROM folders WHERE id=? LIMIT 1');
-                $sourceStmt->execute([$itemId]);
-                $source = $sourceStmt->fetch();
-                if (!$source) throw new RuntimeException('Исходная папка не найдена.');
-
-                if ($operation === 'copy') {
-                    $resultId = clipboard_copy_folder_tree($pdo, $itemId, $destinationFolderId, true);
-                } else {
-                    $sourceParentId = $source['parent_id'] === null ? 0 : (int)$source['parent_id'];
-                    if ($sourceParentId === $destinationFolderId) {
-                        $resultId = $itemId;
-                        $resultName = (string)$source['name'];
-                        $noop = true;
-                    } else {
-                        $resultName = clipboard_unique_name($pdo, 'folder', $destinationFolderId, (string)$source['name'], false, $itemId);
-                        $slug = unique_slug($pdo, 'folders', $resultName, $destinationFolderId, $itemId);
-                        $pdo->prepare('UPDATE folders SET parent_id=?,name=?,slug=?,updated_at=CURRENT_TIMESTAMP WHERE id=?')
-                            ->execute([$destinationFolderId, $resultName, $slug, $itemId]);
-                        $resultId = $itemId;
-                    }
-                }
-
-                if ($resultName === '') {
-                    $nameStmt = $pdo->prepare('SELECT name FROM folders WHERE id=? LIMIT 1');
-                    $nameStmt->execute([$resultId]);
-                    $resultName = (string)($nameStmt->fetchColumn() ?: 'Папка');
-                }
+                $resultId = clipboard_copy_folder_tree($pdo, $itemId, $destinationFolderId, true);
+                $nameStmt = $pdo->prepare('SELECT name FROM folders WHERE id=? LIMIT 1');
+                $nameStmt->execute([$resultId]);
+                $resultName = (string)($nameStmt->fetchColumn() ?: 'Папка');
             } elseif ($type === 'document') {
                 if (!ProjectAccess::containsDocument($pdo, $sourceProject, $itemId)) {
                     throw new RuntimeException('Исходный раздел не найден.');
                 }
-                $sourceStmt = $pdo->prepare('SELECT folder_id,name FROM documents WHERE id=? LIMIT 1');
-                $sourceStmt->execute([$itemId]);
-                $source = $sourceStmt->fetch();
-                if (!$source) throw new RuntimeException('Исходный раздел не найден.');
-
-                if ($operation === 'copy') {
-                    $resultId = clipboard_copy_document($pdo, $itemId, $destinationFolderId, true);
-                } else {
-                    $sourceFolderId = $source['folder_id'] === null ? 0 : (int)$source['folder_id'];
-                    if ($sourceFolderId === $destinationFolderId) {
-                        $resultId = $itemId;
-                        $resultName = (string)$source['name'];
-                        $noop = true;
-                    } else {
-                        $resultName = clipboard_unique_name($pdo, 'document', $destinationFolderId, (string)$source['name'], false, $itemId);
-                        $slug = unique_slug($pdo, 'documents', $resultName, $destinationFolderId, $itemId);
-                        $pdo->prepare('UPDATE documents SET folder_id=?,name=?,slug=?,updated_at=CURRENT_TIMESTAMP WHERE id=?')
-                            ->execute([$destinationFolderId, $resultName, $slug, $itemId]);
-                        $resultId = $itemId;
-                    }
-                }
-
-                if ($resultName === '') {
-                    $nameStmt = $pdo->prepare('SELECT name FROM documents WHERE id=? LIMIT 1');
-                    $nameStmt->execute([$resultId]);
-                    $resultName = (string)($nameStmt->fetchColumn() ?: 'Раздел');
-                }
+                $resultId = clipboard_copy_document($pdo, $itemId, $destinationFolderId, true);
+                $nameStmt = $pdo->prepare('SELECT name FROM documents WHERE id=? LIMIT 1');
+                $nameStmt->execute([$resultId]);
+                $resultName = (string)($nameStmt->fetchColumn() ?: 'Раздел');
             } else {
-                $sourceStmt=$pdo->prepare("SELECT cl.id,cl.folder_id,cl.resource_type,cl.resource_id,
+                $sourceStmt=$pdo->prepare("SELECT cl.id,cl.resource_type,cl.resource_id,
                     d.name AS data_name,f.name AS form_name
                     FROM content_links cl
                     LEFT JOIN data_sets d ON cl.resource_type='data' AND d.id=cl.resource_id AND d.project_id=cl.project_id
@@ -2222,47 +2169,29 @@ try {
                 $resourceType=(string)$source['resource_type'];
                 $resourceId=(int)$source['resource_id'];
                 $resultName=(string)($resourceType==='form' ? ($source['form_name']??'Форма') : ($source['data_name']??'Данные'));
-                $sourceFolderId=(int)$source['folder_id'];
-
-                if($operation==='copy'){
-                    $existing=$pdo->prepare('SELECT id FROM content_links WHERE project_id=? AND folder_id=? AND resource_type=? AND resource_id=? LIMIT 1');
+                $existing=$pdo->prepare('SELECT id FROM content_links WHERE project_id=? AND folder_id=? AND resource_type=? AND resource_id=? LIMIT 1');
+                $existing->execute([(int)$project['id'],$destinationFolderId,$resourceType,$resourceId]);
+                $resultId=(int)($existing->fetchColumn()?:0);
+                if($resultId){
+                    $noop=true;
+                }else{
+                    Database::insertIgnore($pdo,'content_links',[
+                        'project_id'=>(int)$project['id'],
+                        'folder_id'=>$destinationFolderId,
+                        'resource_type'=>$resourceType,
+                        'resource_id'=>$resourceId,
+                        'sort_order'=>100,
+                    ]);
                     $existing->execute([(int)$project['id'],$destinationFolderId,$resourceType,$resourceId]);
                     $resultId=(int)($existing->fetchColumn()?:0);
-                    if($resultId){
-                        $noop=true;
-                    }else{
-                        Database::insertIgnore($pdo,'content_links',[
-                            'project_id'=>(int)$project['id'],
-                            'folder_id'=>$destinationFolderId,
-                            'resource_type'=>$resourceType,
-                            'resource_id'=>$resourceId,
-                            'sort_order'=>100,
-                        ]);
-                        $existing->execute([(int)$project['id'],$destinationFolderId,$resourceType,$resourceId]);
-                        $resultId=(int)($existing->fetchColumn()?:0);
-                        if(!$resultId) throw new RuntimeException('Не удалось создать связь.');
-                    }
-                }else{
-                    if($sourceFolderId===$destinationFolderId){
-                        $resultId=$itemId;
-                        $noop=true;
-                    }else{
-                        $existing=$pdo->prepare('SELECT id FROM content_links WHERE project_id=? AND folder_id=? AND resource_type=? AND resource_id=? AND id<>? LIMIT 1');
-                        $existing->execute([(int)$project['id'],$destinationFolderId,$resourceType,$resourceId,$itemId]);
-                        if($existing->fetchColumn()) throw new RuntimeException('Этот ресурс уже связан с папкой назначения.');
-                        $pdo->prepare('UPDATE content_links SET folder_id=? WHERE id=? AND project_id=?')
-                            ->execute([$destinationFolderId,$itemId,(int)$project['id']]);
-                        $resultId=$itemId;
-                    }
+                    if(!$resultId) throw new RuntimeException('Не удалось создать связь.');
                 }
             }
 
             $pdo->commit();
-
-            $verb = $operation === 'copy' ? 'Скопировано' : ($noop ? 'Уже находится здесь' : 'Перемещено');
             json_response([
                 'ok' => true,
-                'message' => $noop ? ('«' . $resultName . '» уже находится в этой папке.') : ($verb . ': «' . $resultName . '».'),
+                'message' => $noop ? ('«' . $resultName . '» уже находится в этой папке.') : ('Скопировано: «' . $resultName . '».'),
                 'noop' => $noop,
                 'result' => ['type' => $type, 'id' => $resultId, 'name' => $resultName],
                 'state' => admin_state($pdo, $user, $project),
@@ -2272,6 +2201,7 @@ try {
             throw $e;
         }
     }
+
 
     if ($action === 'create_folder') {
         ProjectAccess::requirePermission($pdo,$user,(int)$project['id'],'content.edit');

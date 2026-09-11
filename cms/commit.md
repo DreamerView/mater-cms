@@ -1,1 +1,1 @@
-feat(ui): add password visibility toggles across MaterCMS
+feat(ux): remove cut and add preloader, route delay and trash selection

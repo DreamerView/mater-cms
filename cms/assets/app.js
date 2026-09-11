@@ -122,7 +122,7 @@ const app = createApp({
       try {
         const raw = sessionStorage.getItem('feather-content-clipboard');
         const parsed = raw ? JSON.parse(raw) : null;
-        if (!parsed || !['copy','cut'].includes(parsed.operation)) return null;
+        if (!parsed || parsed.operation !== 'copy') return null;
         if (Array.isArray(parsed.items)) {
           const items = parsed.items.filter(item => ['folder','document'].includes(item?.type) && Number(item?.id) > 0);
           return items.length ? { ...parsed, items } : null;
@@ -143,7 +143,7 @@ const app = createApp({
     const trashItems = ref([]);
     const trashLoading = ref(false);
     const trashSelection = ref([]);
-    const contentDrag = reactive({ active:false, overFolderId:null, operation:'cut' });
+    const contentDrag = reactive({ active:false, overFolderId:null });
     const explorerHistory = ref([]);
     const explorerRedo = ref([]);
     const createMenu = ref(null);
@@ -306,9 +306,6 @@ const app = createApp({
     });
     const contentSelectionCount = computed(() => contentSelection.value.length);
     const isContentSelected = (type, item) => !!item && contentSelection.value.some(selection => selection.type === type && Number(selection.id) === Number(item.id));
-    const isContentCut = (type, item) => !!item
-      && contentClipboard.value?.operation === 'cut'
-      && (contentClipboard.value?.items || []).some(entry => entry.type === type && Number(entry.id) === Number(item.id) && Number(entry.project_id) === Number(state.current_project?.id || 0));
     const selectedContentItems = computed(() => contentSelection.value.map(selection => {
       const source = selection.type === 'folder'
         ? state.folders
@@ -1078,7 +1075,6 @@ const app = createApp({
         if (!multi) add('folder-api','API папки','bi-braces');
         add('copy-content',multi ? `Копировать (${contentSelection.value.length})` : 'Копировать','bi-copy',{shortcut:'Ctrl+C',separatorBefore:true});
         if (can('content.edit')) {
-          add('cut-content',multi ? `Вырезать (${contentSelection.value.length})` : 'Вырезать','bi-scissors',{shortcut:'Ctrl+X'});
           if (contentClipboard.value && !multi) add('paste-into-folder','Вставить в папку','bi-clipboard-check',{shortcut:'Ctrl+V'});
           add('duplicate-content','Создать копию','bi-files',{shortcut:'Ctrl+D'});
           if (!multi) add('rename','Переименовать','bi-pencil-square',{separatorBefore:true,shortcut:'F2'});
@@ -1093,7 +1089,6 @@ const app = createApp({
         if (!multi) add('document-api','API раздела','bi-braces');
         add('copy-content',multi ? `Копировать (${contentSelection.value.length})` : 'Копировать','bi-copy',{shortcut:'Ctrl+C',separatorBefore:true});
         if (can('content.edit')) {
-          add('cut-content',multi ? `Вырезать (${contentSelection.value.length})` : 'Вырезать','bi-scissors',{shortcut:'Ctrl+X'});
           add('duplicate-content','Создать копию','bi-files',{shortcut:'Ctrl+D'});
           if (!multi) add('rename','Переименовать','bi-pencil-square',{separatorBefore:true,shortcut:'F2'});
           add('delete','В корзину','bi-trash3',{danger:true,separatorBefore:multi});
@@ -1106,7 +1101,6 @@ const app = createApp({
         if (!multi) add('linked-resource-api','Открыть API','bi-braces');
         add('copy-content',multi ? `Копировать (${contentSelection.value.length})` : 'Копировать','bi-copy',{shortcut:'Ctrl+C',separatorBefore:true});
         if (can('content.edit')) {
-          add('cut-content',multi ? `Вырезать (${contentSelection.value.length})` : 'Вырезать','bi-scissors',{shortcut:'Ctrl+X'});
           add('duplicate-content','Создать связь в другой папке','bi-files',{shortcut:'Ctrl+D'});
           add('delete','Убрать из папки','bi-link-45deg',{danger:true,separatorBefore:true});
         }
@@ -2239,10 +2233,9 @@ const app = createApp({
       return !formDirty.value && !formSaving.value;
     };
 
-    const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches === true;
     const beginRouteTransition = async () => {
       pageNavigating.value = true;
-      if (!reducedMotion()) await new Promise(resolve => window.setTimeout(resolve, 70));
+      await new Promise(resolve => window.setTimeout(resolve, 250));
     };
     const finishRouteTransition = async () => {
       routeViewKey.value += 1;
@@ -2428,15 +2421,13 @@ const app = createApp({
       }));
     };
 
-    const setContentClipboard = (type = null, item = null, operation = 'copy') => {
+    const setContentClipboard = (type = null, item = null) => {
       const items = clipboardEntries(type,item);
       if (!items.length) return false;
-      const next = { operation: operation === 'cut' ? 'cut' : 'copy', items };
+      const next = { operation:'copy', items };
       persistContentClipboard(next);
       replaceContentSelection(items);
-      notify(next.operation === 'cut'
-        ? (items.length === 1 ? `Вырезано: «${items[0].name}».` : `Вырезано объектов: ${items.length}.`)
-        : (items.length === 1 ? `Скопировано: «${items[0].name}».` : `Скопировано объектов: ${items.length}.`));
+      notify(items.length === 1 ? `Скопировано: «${items[0].name}».` : `Скопировано объектов: ${items.length}.`);
       return true;
     };
 
@@ -2452,43 +2443,33 @@ const app = createApp({
       return apiPost(action,{id:Number(item.id)});
     };
 
-    const pasteEntries = async (entries, destinationFolderId = route.folderId, operation = 'copy', options = {}) => {
+    const pasteEntries = async (entries, destinationFolderId = route.folderId, options = {}) => {
       const items = selectionWithoutNested(entries);
       if (!items.length || clipboardBusy.value) return false;
       if (!can('content.edit')) { notify('Нет прав на изменение содержимого этой папки.','error'); return false; }
       clipboardBusy.value = true;
-      const results=[]; const moves=[]; const failures=[];
+      const results=[]; const failures=[];
       try {
         for (const entry of items) {
           try {
-            const live = Number(entry.project_id) === Number(state.current_project?.id || 0) ? contentItemBySelection(entry) : null;
-            const fromFolderId = live ? (entry.type === 'folder' ? live.parent_id : live.folder_id) : null;
             const payload = await apiPost('paste_content', {
-              operation,
               item_type:entry.type,
               item_id:Number(entry.id),
               source_project_id:Number(entry.project_id || state.current_project?.id || 0),
               destination_folder_id:destinationFolderId ?? null,
             });
             if (payload.state) applyState(payload.state);
-            if (payload.result) {
-              results.push({...payload.result,project_id:Number(state.current_project?.id || 0),noop:payload.noop===true});
-              if (operation === 'cut' && !payload.noop && Number(entry.project_id) === Number(state.current_project?.id || 0)) {
-                moves.push({type:entry.type,id:Number(entry.id),from:fromFolderId ?? null,to:destinationFolderId ?? null,project_id:Number(entry.project_id)});
-              }
-            }
+            if (payload.result) results.push({...payload.result,project_id:Number(state.current_project?.id || 0),noop:payload.noop===true});
           } catch (error) { failures.push({entry,error}); }
         }
         if (results.length) replaceContentSelection(results);
-        if (operation === 'cut' && !failures.length) persistContentClipboard(null);
         const changedResults=results.filter(item=>!item.noop);
         if (options.history !== false && changedResults.length) {
-          if (operation === 'copy') pushExplorerHistory({kind:'copy',source:items.map(item=>({...item})),destination:destinationFolderId??null,created:changedResults.map(({noop,...item})=>({...item}))});
-          else if (moves.length) pushExplorerHistory({kind:'move',moves});
+          pushExplorerHistory({kind:'copy',source:items.map(item=>({...item})),destination:destinationFolderId??null,created:changedResults.map(({noop,...item})=>({...item}))});
         }
         if (failures.length) notify(`Готово: ${results.length}. Не удалось: ${failures.length}. ${failures[0].error?.message || ''}`,'error');
         else if(results.length && !changedResults.length) notify('Этот связанный ресурс уже находится в папке назначения.');
-        else notify(changedResults.length === 1 ? (operation === 'cut' ? 'Объект перемещён.' : 'Копия создана.') : `${operation === 'cut' ? 'Перемещено' : 'Скопировано'} объектов: ${changedResults.length}.`);
+        else notify(changedResults.length === 1 ? 'Копия создана.' : `Скопировано объектов: ${changedResults.length}.`);
         return results.length > 0;
       } finally { clipboardBusy.value = false; }
     };
@@ -2496,13 +2477,13 @@ const app = createApp({
     const pasteContent = async (destinationFolderId = route.folderId) => {
       const clip = contentClipboard.value;
       if (!clip?.items?.length) return false;
-      return pasteEntries(clip.items,destinationFolderId,clip.operation);
+      return pasteEntries(clip.items,destinationFolderId);
     };
 
     const duplicateSelection = async () => {
       const items = clipboardEntries();
       if (!items.length) return;
-      await pasteEntries(items,route.folderId,'copy');
+      await pasteEntries(items,route.folderId);
     };
 
     const clearContentSelection = () => { contentSelection.value = []; contentSelectionAnchor.value = null; };
@@ -2601,10 +2582,15 @@ const app = createApp({
       finally{trashLoading.value=false;}
     };
     const openTrash = async () => { drawer.value='trash'; await loadTrash(); };
-    const toggleTrashSelection = (item,event=null) => {
-      const id=Number(item.id);const exists=trashSelection.value.includes(id);
-      if(event?.ctrlKey||event?.metaKey){trashSelection.value=exists?trashSelection.value.filter(x=>x!==id):[...trashSelection.value,id];}
-      else trashSelection.value=[id];
+    const trashSelectionCount = computed(() => trashSelection.value.length);
+    const allTrashSelected = computed(() => trashItems.value.length > 0 && trashSelection.value.length === trashItems.value.length);
+    const isTrashSelected = item => trashSelection.value.includes(Number(item?.id));
+    const toggleTrashSelection = item => {
+      const id=Number(item?.id || 0);if(!id)return;
+      trashSelection.value=isTrashSelected(item)?trashSelection.value.filter(x=>x!==id):[...trashSelection.value,id];
+    };
+    const toggleAllTrash = () => {
+      trashSelection.value=allTrashSelected.value?[]:trashItems.value.map(item=>Number(item.id));
     };
     const restoreTrash = async ids => {
       const selected=Array.isArray(ids)&&ids.length?ids:trashSelection.value;if(!selected.length)return;
@@ -2677,8 +2663,6 @@ const app = createApp({
       try{
         if(op.kind==='rename'){
           const payload=await apiPost(op.type==='folder'?'rename_folder':'rename_document',{id:op.id,name:op.from});if(payload.state)applyState(payload.state);
-        }else if(op.kind==='move'){
-          for(const move of [...op.moves].reverse())await pasteEntries([{type:move.type,id:move.id,name:'',project_id:move.project_id}],move.from,'cut',{history:false});
         }else if(op.kind==='copy'){
           for(const created of [...op.created].reverse()) { const payload=await apiDeleteContentPermanently(created); if(payload.state)applyState(payload.state); }
           clearContentSelection();
@@ -2700,10 +2684,8 @@ const app = createApp({
       try{
         if(op.kind==='rename'){
           const payload=await apiPost(op.type==='folder'?'rename_folder':'rename_document',{id:op.id,name:op.to});if(payload.state)applyState(payload.state);
-        }else if(op.kind==='move'){
-          for(const move of op.moves)await pasteEntries([{type:move.type,id:move.id,name:'',project_id:move.project_id}],move.to,'cut',{history:false});
         }else if(op.kind==='copy'){
-          const before=explorerHistory.value.length;await pasteEntries(op.source,op.destination,'copy',{history:false});op.created=selectedContentItems.value.map(item=>({type:item.type,id:Number(item.id),name:item.name}));
+          const before=explorerHistory.value.length;await pasteEntries(op.source,op.destination,{history:false});op.created=selectedContentItems.value.map(item=>({type:item.type,id:Number(item.id),name:item.name}));
         }else if(op.kind==='trash'){
           const newIds=[];const sources=(op.restored&&op.restored.length)?op.restored:op.items;
           for(const item of sources){const payload=await apiPost('trash_content',{item_type:item.type,item_id:Number(item.id)});if(payload.state)applyState(payload.state);if(payload.trash_id)newIds.push(Number(payload.trash_id));}
@@ -2727,13 +2709,13 @@ const app = createApp({
     const startContentDrag = (event,type,item) => {
       if(!isContentSelected(type,item))selectContentItem(type,item);
       const items=clipboardEntries(type,item);if(!items.length)return;
-      contentDrag.active=true;contentDrag.operation=event.ctrlKey||event.metaKey?'copy':'cut';
-      try{event.dataTransfer.effectAllowed='copyMove';event.dataTransfer.setData('text/plain',items.map(x=>x.name).join(', '));event.dataTransfer.setData('application/x-feather-content',JSON.stringify(items));}catch(_){}
+      contentDrag.active=true;
+      try{event.dataTransfer.effectAllowed='copy';event.dataTransfer.dropEffect='copy';event.dataTransfer.setData('text/plain',items.map(x=>x.name).join(', '));event.dataTransfer.setData('application/x-matercms-content',JSON.stringify(items));}catch(_){}
     };
-    const contentDragOver = (event,folderId=null) => {if(!contentDrag.active)return;event.preventDefault();contentDrag.overFolderId=folderId??null;if(event.dataTransfer)event.dataTransfer.dropEffect=event.ctrlKey||event.metaKey?'copy':'move';};
+    const contentDragOver = (event,folderId=null) => {if(!contentDrag.active)return;event.preventDefault();contentDrag.overFolderId=folderId??null;if(event.dataTransfer)event.dataTransfer.dropEffect='copy';};
     const contentDragLeave = event => {if(event.currentTarget===event.target)contentDrag.overFolderId=null;};
     const dropContent = async (event,folderId=null) => {
-      if(!contentDrag.active)return;event.preventDefault();const operation=event.ctrlKey||event.metaKey?'copy':contentDrag.operation;const items=clipboardEntries();contentDrag.active=false;contentDrag.overFolderId=null;if(items.length)await pasteEntries(items,folderId??route.folderId,operation);
+      if(!contentDrag.active)return;event.preventDefault();const items=clipboardEntries();contentDrag.active=false;contentDrag.overFolderId=null;if(items.length)await pasteEntries(items,folderId??route.folderId);
     };
     const endContentDrag = () => {contentDrag.active=false;contentDrag.overFolderId=null;};
 
@@ -2771,8 +2753,7 @@ const app = createApp({
           else { await openDataSet(item.resource_id); drawer.value = 'data-api'; }
           return;
         case 'open-new-tab': return openSelectedInNewTab(item ? {...item,type:menu.type} : null);
-        case 'copy-content': return setContentClipboard(menu.type, item, 'copy');
-        case 'cut-content': return setContentClipboard(menu.type, item, 'cut');
+        case 'copy-content': return setContentClipboard(menu.type, item);
         case 'duplicate-content': return duplicateSelection();
         case 'paste-content': return pasteContent(route.folderId);
         case 'paste-into-folder': return pasteContent(item.id);
@@ -4481,8 +4462,7 @@ const app = createApp({
 
       if (explorerHotkeysActive && !keyboardUsesNativeClipboard(event)) {
         if (shortcut === 'a') { event.preventDefault(); selectAllContent(); return; }
-        if (shortcut === 'c' && contentSelection.value.length) { event.preventDefault(); setContentClipboard(null,null,'copy'); return; }
-        if (shortcut === 'x' && contentSelection.value.length && can('content.edit')) { event.preventDefault(); setContentClipboard(null,null,'cut'); return; }
+        if (shortcut === 'c' && contentSelection.value.length) { event.preventDefault(); setContentClipboard(); return; }
         if (shortcut === 'v' && contentClipboard.value?.items?.length && can('content.edit')) { event.preventDefault(); pasteContent(route.folderId); return; }
         if (shortcut === 'd' && contentSelection.value.length && can('content.edit')) { event.preventDefault(); duplicateSelection(); return; }
         if (shortcut === 'z' && !event.shiftKey) { event.preventDefault(); undoExplorer(); return; }
@@ -4680,12 +4660,14 @@ const app = createApp({
       trashItems,
       trashLoading,
       trashSelection,
+      trashSelectionCount,
+      allTrashSelected,
+      isTrashSelected,
       contentDrag,
       explorerHistory,
       explorerRedo,
       clipboardBusy,
       isContentSelected,
-      isContentCut,
       selectContentItem,
       activateContentItem,
       setContentClipboard,
@@ -4706,6 +4688,7 @@ const app = createApp({
       openTrash,
       loadTrash,
       toggleTrashSelection,
+      toggleAllTrash,
       restoreTrash,
       deleteTrashForever,
       emptyTrash,
