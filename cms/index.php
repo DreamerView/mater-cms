@@ -1340,9 +1340,7 @@ $config = [
       <button v-if="can('settings.view')" class="nav-home" :class="{active:['settings','settings-api','settings-languages','settings-projects','settings-team','database'].includes(route.kind)}" type="button" @click="openSettings"><i class="bi bi-gear files-symbol"></i><b>Настройки</b></button>
       <button class="nav-home nav-about" :class="{active:route.kind==='about'}" type="button" @click="openAbout"><i class="bi bi-info-circle files-symbol"></i><b>О продукте</b></button>
       <button class="nav-home nav-trash" type="button" @click="openTrash"><i class="bi bi-trash3 files-symbol"></i><b>Корзина</b><small v-if="state.trash_count">{{ state.trash_count }}</small></button>
-      <folder-tree :folders="state.folders" :documents="state.documents" :parent-id="null" :active-id="route.kind==='folder'?route.folderId:document?.folder_id" @open="openFolderFromNav"></folder-tree>
     </nav>
-    <div v-if="can('content.edit')" class="drawer-footer"><button class="button soft wide" type="button" @click="chooseCreate('folder');drawer=null"><i class="bi bi-folder-plus"></i> Новая папка</button></div>
   </aside>
 
   <aside v-if="drawer==='trash'" class="drawer right-drawer content-trash-drawer">

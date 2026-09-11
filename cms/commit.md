@@ -1,1 +1,1 @@
-fix(auth): polish desktop login balance and remove duplicate wordmark
+fix(nav): simplify mobile drawer by removing folder tree and new-folder action
