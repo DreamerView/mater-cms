@@ -1,0 +1,18 @@
+Options -Indexes
+RewriteEngine On
+
+# Preserve Bearer tokens behind Apache/FastCGI rewrites.
+RewriteCond %{HTTP:Authorization} .
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# Existing files/folders are served normally.
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Private SPA API.
+RewriteRule ^api/admin/?$ api/admin.php [QSA,L]
+
+# Public project API: /api/{project-slug}/home/hero
+RewriteRule ^api/?$ api/index.php [QSA,L]
+RewriteRule ^api/(.+)$ api/index.php?path=$1 [QSA,L]
