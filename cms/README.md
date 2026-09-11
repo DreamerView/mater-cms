@@ -9,7 +9,7 @@
 </p>
 
 
-Версия: **2026.09.11.3**
+Версия: **2026.09.11.6**
 
 Лёгкая headless CMS на **PHP + Vue 3 SPA** без npm, Vite и build-step. Для хранения данных можно выбрать **SQLite, MySQL или PostgreSQL**.
 
@@ -154,7 +154,7 @@ https://example.com/cms/
 
 История релизов находится в [VERSION.md](VERSION.md). MaterCMS использует release-идентификаторы формата `YYYY.MM.DD.N`, где `N` — номер сборки за день.
 
-`README.md`, `DOCUMENTATION.md` и `VERSION.md` являются частью продукта и обновляются вместе с каждым изменением MaterCMS.
+`README.md`, `DOCUMENTATION.md`, `VERSION.md` и `commit.md` являются частью продукта и обновляются вместе с каждым изменением MaterCMS.
 
 - Полноэкранный preview теперь блокирует прокрутку фоновой страницы и не показывает внешний системный scrollbar.
 
@@ -321,4 +321,39 @@ MaterCMS сам проверяет сервер при первом запуск
 ## 2026-09-11 — Брендинг MaterCMS в светлой и тёмной теме
 
 Интерфейс использует отдельные фирменные icon-mark и wordmark для каждой темы. В тёмной теме загружается светлая версия переднего слоя логотипа, в светлой — тёмная. Markdown-документы также автоматически выбирают подходящий wordmark через `prefers-color-scheme`.
+
+## Git commit message
+
+MaterCMS хранит текущую строку для `git commit -m` сразу в двух синхронных файлах:
+
+- `/commit.md` — в корне репозитория;
+- `/cms/commit.md` — внутри папки CMS.
+
+Оба файла всегда содержат **одну и ту же единственную строку** и полностью перезаписываются при каждом релизе. История версий и подробный changelog хранятся только в `VERSION.md`.
+
+Текущий commit message:
+
+```text
+chore(git): keep commit message in root and cms
+```
+
+Windows CMD:
+
+```bat
+set /p COMMIT_MSG=<commit.md
+git commit -m "%COMMIT_MSG%"
+```
+
+Если Git запускается из каталога `cms`, можно использовать `cms/commit.md` относительно корня либо локальный `commit.md` внутри `cms`.
+
+## Git commit message
+
+Файл `commit.md` в корне проекта предназначен **только для текущего Git commit message**. Он всегда содержит одну короткую строку, пригодную для `git commit -m`. При каждом следующем изменении MaterCMS файл полностью перезаписывается. История релизов и подробный changelog остаются в `VERSION.md`.
+
+Пример для Windows CMD:
+
+```bat
+set /p COMMIT_MSG=<commit.md
+git commit -m "%COMMIT_MSG%"
+```
 
