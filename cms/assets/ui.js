@@ -55,6 +55,9 @@
     window.fetch = (...args) => {
       let thresholdReached = false;
       const timer = window.setTimeout(() => {
+        // Route navigation has its own contextual skeleton. Avoid stacking a
+        // full-screen blur preloader on top of it.
+        if (document.documentElement.classList.contains('matercms-route-loading') || document.documentElement.classList.contains('product-document-open')) return;
         thresholdReached = true;
         show();
       }, 100);

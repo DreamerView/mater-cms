@@ -173,11 +173,11 @@ if (!Database::installed()) {
               <div class="auth-brand auth-brand-wordmark"><span class="brand-wordmark"><img class="logo-light" src="<?=e(asset_url('assets/branding/matercms-wordmark-light.webp'))?>" alt="MaterCMS"><img class="logo-dark" src="<?=e(asset_url('assets/branding/matercms-wordmark-dark.webp'))?>" alt="MaterCMS"></span><div class="sr-only-brand"><strong>MaterCMS</strong><small>Контент без лишнего</small></div></div>
               <div class="installer-side-copy"><span class="auth-kicker"><i class="bi bi-stars"></i> Первый запуск</span>
                 <div class="installer-preflight <?= $environmentReport['ready'] ? 'ready' : 'warning' ?>">
-                  <span><i class="bi <?= $environmentReport['ready'] ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill' ?>"></i></span>
+                  <span><i class="bi <?= $environmentReport['ready'] ? 'bi-check-circle' : 'bi-exclamation-triangle' ?>"></i></span>
                   <div><strong><?= $environmentReport['ready'] ? 'Сервер готов' : 'Нужна настройка сервера' ?></strong><small><?= $environmentReport['ready'] ? 'MaterCMS проверил обязательные зависимости.' : 'Проверьте PHP 8.1+, PDO-драйвер и права на cms/data и cms/uploads.' ?></small></div>
                 </div><?php if(!$databaseConfigured): ?><h2>Где хранить данные?</h2><p>SQLite работает локально без настройки. Для серверной базы подключите MySQL или PostgreSQL.</p><?php else: ?><h2>Последний шаг.</h2><p>База уже подключена. Создайте владельца MaterCMS и переходите к работе.</p><?php endif; ?></div>
               <div class="installer-progress">
-                <div class="installer-progress-item active"><span>01</span><div><b>База данных</b><small><?= $databaseConfigured ? 'Подключена' : 'Выберите хранилище' ?></small></div><i class="bi <?= $databaseConfigured ? 'bi-check-circle-fill' : 'bi-circle-fill' ?>"></i></div>
+                <div class="installer-progress-item active"><span>01</span><div><b>База данных</b><small><?= $databaseConfigured ? 'Подключена' : 'Выберите хранилище' ?></small></div><i class="bi <?= $databaseConfigured ? 'bi-check-circle' : 'bi-circle-fill' ?>"></i></div>
                 <div class="installer-progress-item <?= $databaseConfigured ? 'active' : '' ?>"><span>02</span><div><b>Администратор</b><small><?= $databaseConfigured ? 'Создайте владельца' : 'Следующий шаг' ?></small></div><i class="bi <?= $databaseConfigured ? 'bi-circle-fill' : 'bi-circle' ?>"></i></div>
               </div>
               <small class="installer-side-foot"><i class="bi bi-shield-check"></i> Конфигурация хранится локально в MaterCMS</small>
@@ -190,7 +190,7 @@ if (!Database::installed()) {
                 <p><?= $databaseConfigured ? 'База подключена. Осталось создать владельца MaterCMS.' : 'SQLite — без настройки. MySQL и PostgreSQL можно подключить готовым URL или отдельными полями.' ?></p>
               </header>
 
-              <?php if($installError):?><div class="installer-alert"><i class="bi bi-exclamation-triangle-fill"></i><div><b>Не получилось</b><p><?=e($installError)?></p></div></div><?php endif;?>
+              <?php if($installError):?><div class="installer-alert"><i class="bi bi-exclamation-triangle"></i><div><b>Не получилось</b><p><?=e($installError)?></p></div></div><?php endif;?>
 
               <?php if(!$databaseConfigured): ?>
               <form method="post" class="installer-form" id="databaseSetupForm">
@@ -199,12 +199,12 @@ if (!Database::installed()) {
                   <?php foreach($databaseAvailability as $driver => $meta): ?>
                     <label class="database-choice-card <?=empty($meta['available'])?'disabled':''?>">
                       <input type="radio" name="db_driver" value="<?=e($driver)?>" <?= $selectedDriver===$driver?'checked':'' ?> <?=empty($meta['available'])?'disabled':''?>>
-                      <span class="database-choice-icon <?=e($driver)?>"><i class="bi <?= $driver==='sqlite'?'bi-database':($driver==='mysql'?'bi-hdd-stack-fill':'bi-boxes') ?>"></i></span>
+                      <span class="database-choice-icon <?=e($driver)?>"><i class="bi <?= $driver==='sqlite'?'bi-database':($driver==='mysql'?'bi-hdd-stack':'bi-boxes') ?>"></i></span>
                       <span class="database-choice-copy">
-                        <span class="database-choice-title"><b><?=e($meta['label'])?></b><?php if(!empty($meta['available'])):?><em><i class="bi bi-check-circle-fill"></i> Доступно</em><?php else:?><em class="missing"><i class="bi bi-x-circle-fill"></i> Нет <?=e($meta['extension'])?></em><?php endif;?></span>
+                        <span class="database-choice-title"><b><?=e($meta['label'])?></b><?php if(!empty($meta['available'])):?><em><i class="bi bi-check-circle"></i> Доступно</em><?php else:?><em class="missing"><i class="bi bi-x-circle"></i> Нет <?=e($meta['extension'])?></em><?php endif;?></span>
                         <small><?=e($meta['description'])?></small>
                       </span>
-                      <i class="bi bi-check-circle-fill database-choice-check"></i>
+                      <i class="bi bi-check-circle database-choice-check"></i>
                     </label>
                   <?php endforeach; ?>
                 </div>
@@ -234,11 +234,11 @@ if (!Database::installed()) {
                 </div>
 
                 <div class="installer-sqlite-note" data-sqlite-note>
-                  <span><i class="bi bi-lightning-charge-fill"></i></span>
+                  <span><i class="bi bi-lightning-charge"></i></span>
                   <div><b>SQLite не требует настройки</b><p>MaterCMS создаст <code>cms/data/matercms.sqlite</code>. Никаких host, логина или отдельного сервера.</p></div>
                 </div>
 
-                <button class="button primary installer-primary" type="submit"><i class="bi bi-plug-fill"></i> Проверить и продолжить</button>
+                <button class="button primary installer-primary" type="submit"><i class="bi bi-plug"></i> Проверить и продолжить</button>
               </form>
             <?php else: ?>
               <section class="database-connected-card">
@@ -310,7 +310,7 @@ if (!$user) {
             <section class="auth-login-panel">
               <div class="auth-mobile-brand auth-brand-wordmark"><span class="brand-wordmark"><img class="logo-light" src="<?=e(asset_url('assets/branding/matercms-wordmark-light.webp'))?>" alt="MaterCMS"><img class="logo-dark" src="<?=e(asset_url('assets/branding/matercms-wordmark-dark.webp'))?>" alt="MaterCMS"></span><div class="sr-only-brand"><strong>MaterCMS</strong><small>Контент без лишнего</small></div></div>
               <div class="auth-login-head"><small>ВХОД В MATER</small><h2>С возвращением</h2><p>Продолжите работу с вашим контентом.</p></div>
-              <?php if($loginError):?><div class="auth-error"><i class="bi bi-exclamation-circle-fill"></i><span><?=e($loginError)?></span></div><?php endif;?>
+              <?php if($loginError):?><div class="auth-error"><i class="bi bi-exclamation-circle"></i><span><?=e($loginError)?></span></div><?php endif;?>
               <form method="post" class="auth-form"><?=csrf_field()?><input type="hidden" name="action" value="login">
                 <label><span>Email</span><div class="auth-input-wrap"><i class="bi bi-envelope"></i><input type="email" name="email" required autofocus autocomplete="email" placeholder="name@example.com"></div></label>
                 <label><span>Пароль</span><div class="auth-input-wrap auth-input-password"><i class="bi bi-lock"></i><input data-password-input type="password" name="password" required autocomplete="current-password" placeholder="Введите пароль"><button class="password-toggle" data-password-toggle type="button" aria-label="Показать пароль" aria-pressed="false" title="Показать пароль"><i class="bi bi-eye"></i></button></div></label>
@@ -396,7 +396,7 @@ $config = [
       </div>
 
       <div class="topbar-right">
-        <button v-if="!['settings','settings-api','settings-languages','settings-projects','settings-team','database'].includes(route.kind)" class="button ghost api-button" type="button" @click="drawer = route.kind==='form' ? 'form-api' : 'api'"><i class="bi bi-braces"></i> API</button>
+        <button v-if="!['settings','settings-api','settings-languages','settings-projects','settings-team','database','about'].includes(route.kind)" class="button ghost api-button" type="button" @click="drawer = route.kind==='form' ? 'form-api' : 'api'"><i class="bi bi-braces"></i> API</button>
         <button class="avatar-button" type="button" @click.stop="toggleUserMenu">
           <span class="avatar">{{ initials }}</span><span class="user-name">{{ state.user?.name || 'Администратор' }}</span><i class="bi bi-chevron-down chevron"></i>
         </button>
@@ -406,42 +406,65 @@ $config = [
         </div>
       </div>
     </header>
-    <div v-if="pageNavigating" class="route-progress" aria-hidden="true"><i></i></div>
-
     <main class="workspace">
-      <section v-if="loading" class="loading-state">
-        <span class="spinner"></span><p>Открываем MaterCMS…</p>
+      <section v-if="loading" class="smart-route-skeleton skeleton-explorer initial-skeleton" aria-label="Загрузка MaterCMS">
+        <div class="skeleton-breadcrumbs"><i></i><i></i><i></i></div>
+        <div class="skeleton-title-block"><i class="skeleton-title"></i><i class="skeleton-copy"></i></div>
+        <div class="skeleton-toolbar"><i v-for="n in 7" :key="'initial-tool-'+n"></i></div>
+        <div class="skeleton-card-grid"><article v-for="n in 8" :key="'initial-card-'+n"><i class="skeleton-icon"></i><span><b></b><small></small></span></article></div>
       </section>
 
-      <div v-else class="route-stage" :class="{navigating:pageNavigating}" :key="routeViewKey" @contextmenu="openPageContext">
+      <section v-else-if="pageNavigating" class="smart-route-skeleton" :class="'skeleton-'+routeSkeletonKind" aria-label="Загрузка страницы">
+        <div class="skeleton-breadcrumbs"><i></i><i></i><i></i></div>
+        <template v-if="routeSkeletonKind==='editor'">
+          <div class="skeleton-editor-head"><div><i class="skeleton-title"></i><i class="skeleton-copy"></i></div><i class="skeleton-pill"></i></div>
+          <div class="skeleton-editor-layout"><section class="skeleton-editor-main"><i class="skeleton-input wide"></i><i class="skeleton-input"></i><i class="skeleton-input tall"></i><i class="skeleton-input"></i></section><aside class="skeleton-editor-side"><article v-for="n in 3" :key="'editor-side-'+n"><i></i><b></b><small></small></article></aside></div>
+        </template>
+        <template v-else-if="routeSkeletonKind==='settings'">
+          <div class="skeleton-hero-row"><i class="skeleton-hero-icon"></i><span><b></b><small></small></span></div>
+          <div class="skeleton-settings-stack"><article v-for="n in 4" :key="'setting-'+n"><i class="skeleton-setting-icon"></i><span><b></b><small></small></span><em></em></article></div>
+        </template>
+        <template v-else-if="routeSkeletonKind==='management'">
+          <div class="skeleton-hero-row management"><i class="skeleton-hero-icon"></i><span><b></b><small></small></span><em></em></div>
+          <div class="skeleton-summary-grid"><article v-for="n in 3" :key="'summary-'+n"><i></i><span><b></b><small></small></span></article></div>
+          <div class="skeleton-card-grid management-grid"><article v-for="n in 6" :key="'management-'+n"><i class="skeleton-icon"></i><span><b></b><small></small></span></article></div>
+        </template>
+        <template v-else>
+          <div class="skeleton-title-block"><i class="skeleton-title"></i><i class="skeleton-copy"></i></div>
+          <div class="skeleton-toolbar"><i v-for="n in 7" :key="'tool-'+n"></i></div>
+          <div class="skeleton-card-grid"><article v-for="n in 8" :key="'card-'+n"><i class="skeleton-icon"></i><span><b></b><small></small></span></article></div>
+        </template>
+      </section>
+
+      <div v-else class="route-stage" :key="routeViewKey" @contextmenu="openPageContext">
         <section v-if="route.kind==='settings-projects'" class="explorer-view projects-view settings-collection-page">
           <div class="breadcrumbs"><button type="button" @click="goRoot">MaterCMS</button><span>›</span><button type="button" @click="openSettings">Настройки</button><span>›</span><b>Проекты</b></div>
 
           <div class="settings-page-hero projects-page-hero">
-            <div class="settings-page-hero-icon"><i class="bi bi-layers-fill"></i></div>
+            <div class="settings-page-hero-icon"><i class="bi bi-layers"></i></div>
             <div class="settings-page-hero-copy"><h1>Проекты</h1><p>Рабочие пространства MaterCMS. Выберите проект и управляйте его участниками, ролями, правами и системными параметрами в одном месте.</p></div>
             <button v-if="isSystemOwner" class="button primary settings-page-hero-action" type="button" @click="openCreateProject"><i class="bi bi-plus-lg"></i> Новый проект</button>
           </div>
 
           <div class="settings-summary-grid project-summary-grid">
-            <article><span><i class="bi bi-collection-fill"></i></span><div><small>ВСЕГО</small><strong>{{ projects.length }}</strong><p>{{ plural(projects.length,'проект','проекта','проектов') }}</p></div></article>
-            <article><span><i class="bi bi-check-circle-fill"></i></span><div><small>СЕЙЧАС ВЫБРАН</small><strong class="summary-name">{{ currentProject?.name || '—' }}</strong><p>/{{ currentProject?.slug || '' }}</p></div></article>
-            <article><span><i class="bi" :class="state.api_access?.mode==='private' ? 'bi-shield-lock-fill' : 'bi-globe2'"></i></span><div><small>API ТЕКУЩЕГО</small><strong>{{ state.api_access?.mode==='private' ? 'Приватный' : 'Публичный' }}</strong><p>Настраивается отдельно для проекта</p></div></article>
+            <article><span><i class="bi bi-collection"></i></span><div><small>ВСЕГО</small><strong>{{ projects.length }}</strong><p>{{ plural(projects.length,'проект','проекта','проектов') }}</p></div></article>
+            <article><span><i class="bi bi-check-circle"></i></span><div><small>СЕЙЧАС ВЫБРАН</small><strong class="summary-name">{{ currentProject?.name || '—' }}</strong><p>/{{ currentProject?.slug || '' }}</p></div></article>
+            <article><span><i class="bi" :class="state.api_access?.mode==='private' ? 'bi-shield-lock' : 'bi-globe2'"></i></span><div><small>API ТЕКУЩЕГО</small><strong>{{ state.api_access?.mode==='private' ? 'Приватный' : 'Публичный' }}</strong><p>Настраивается отдельно для проекта</p></div></article>
           </div>
 
           <div v-if="projectLoading" class="files-loading"><span class="spinner"></span><p>Загружаем проекты…</p></div>
           <div v-else class="project-product-grid">
             <article v-for="project in projects" :key="project.id" class="project-product-card" :class="{active:Number(project.id)===Number(currentProject?.id)}" @contextmenu.prevent.stop="openObjectContext($event,'project',project)">
               <div class="project-product-card-head">
-                <span class="project-product-icon"><i class="bi bi-layers-fill"></i></span>
+                <span class="project-product-icon"><i class="bi bi-layers"></i></span>
                 <div class="project-product-badges">
-                  <span class="project-api-pill" :class="project.api_access?.mode || 'public'"><i class="bi" :class="project.api_access?.mode==='private' ? 'bi-lock-fill' : 'bi-globe2'"></i>{{ project.api_access?.mode==='private' ? 'Private' : 'Public' }}</span>
+                  <span class="project-api-pill" :class="project.api_access?.mode || 'public'"><i class="bi" :class="project.api_access?.mode==='private' ? 'bi-lock' : 'bi-globe2'"></i>{{ project.api_access?.mode==='private' ? 'Private' : 'Public' }}</span>
                   <span v-if="Number(project.id)===Number(currentProject?.id)" class="active-project-pill"><i class="bi bi-check2"></i> Текущий</span>
                 </div>
               </div>
               <div class="project-product-copy"><h3>{{ project.name }}</h3><code>/{{ project.slug }}</code><p><i class="bi bi-person-badge"></i> {{ {owner:'Владелец',admin:'Администратор',editor:'Редактор',viewer:'Просмотр'}[project.role] || project.role }}</p></div>
               <button v-if="Number(project.id)!==Number(currentProject?.id)" class="project-open-button" type="button" @click="switchProject(project)"><span>Выбрать проект</span><i class="bi bi-arrow-right"></i></button>
-              <div v-else class="project-current-button"><i class="bi bi-check-circle-fill"></i><span>Выбран</span></div>
+              <div v-else class="project-current-button"><i class="bi bi-check-circle"></i><span>Выбран</span></div>
             </article>
           </div>
 
@@ -478,15 +501,15 @@ $config = [
           <div class="breadcrumbs"><button type="button" @click="goRoot">MaterCMS</button><span>›</span><button type="button" @click="openSettings">Настройки</button><span>›</span><b>Команда</b></div>
 
           <div class="settings-page-hero users-page-hero">
-            <div class="settings-page-hero-icon users"><i class="bi bi-people-fill"></i></div>
+            <div class="settings-page-hero-icon users"><i class="bi bi-people"></i></div>
             <div class="settings-page-hero-copy"><h1>Команда</h1><p>Учётные записи MaterCMS. Здесь только создание, редактирование и удаление пользователей — доступ к проектам, роли и права находятся в разделе «Проекты».</p></div>
-            <button v-if="isSystemOwner" class="button primary settings-page-hero-action" type="button" @click="openCreateUser"><i class="bi bi-person-plus-fill"></i> Новый пользователь</button>
+            <button v-if="isSystemOwner" class="button primary settings-page-hero-action" type="button" @click="openCreateUser"><i class="bi bi-person-plus"></i> Новый пользователь</button>
           </div>
 
           <template v-if="isSystemOwner">
             <div class="settings-summary-grid users-summary-grid team-directory-summary">
-              <article><span><i class="bi bi-people-fill"></i></span><div><small>ВСЕГО</small><strong>{{ users.length }}</strong><p>{{ plural(users.length,'пользователь','пользователя','пользователей') }}</p></div></article>
-              <article><span><i class="bi bi-shield-fill-check"></i></span><div><small>ВЛАДЕЛЬЦЫ CMS</small><strong>{{ users.filter(account=>account.system_role==='owner').length }}</strong><p>защищённые учётные записи</p></div></article>
+              <article><span><i class="bi bi-people"></i></span><div><small>ВСЕГО</small><strong>{{ users.length }}</strong><p>{{ plural(users.length,'пользователь','пользователя','пользователей') }}</p></div></article>
+              <article><span><i class="bi bi-shield-check"></i></span><div><small>ВЛАДЕЛЬЦЫ CMS</small><strong>{{ users.filter(account=>account.system_role==='owner').length }}</strong><p>защищённые учётные записи</p></div></article>
               <article><span><i class="bi bi-person-gear"></i></span><div><small>ОБЫЧНЫЕ</small><strong>{{ users.filter(account=>account.system_role!=='owner').length }}</strong><p>можно редактировать и удалять</p></div></article>
             </div>
 
@@ -498,7 +521,7 @@ $config = [
                   <div class="user-product-head">
                     <span class="member-avatar user-product-avatar">{{ (account.name || 'U').slice(0,1).toUpperCase() }}</span>
                     <div class="user-product-identity"><strong>{{ account.name }}</strong><small>{{ account.email }}</small></div>
-                    <span v-if="account.system_role==='owner'" class="role-pill owner"><i class="bi bi-shield-fill-check"></i> Владелец CMS</span>
+                    <span v-if="account.system_role==='owner'" class="role-pill owner"><i class="bi bi-shield-check"></i> Владелец CMS</span>
                   </div>
                   <div class="team-directory-meta"><span><i class="bi bi-person-vcard"></i>{{ account.system_role==='owner' ? 'Системный владелец' : 'Пользователь MaterCMS' }}</span><span v-if="account.created_at"><i class="bi bi-calendar3"></i>{{ formatDate(account.created_at) }}</span></div>
                   <div class="user-product-actions team-directory-actions">
@@ -588,7 +611,7 @@ $config = [
           <div class="breadcrumbs"><button type="button" @click="openData">Данные</button><span>›</span><b>{{ dataSet.name }}</b></div>
           <div class="editor-head">
             <button class="back-button" type="button" @click="openData"><i class="bi bi-arrow-left"></i></button>
-            <div class="data-editor-badge"><i class="bi bi-database-fill"></i></div>
+            <div class="data-editor-badge"><i class="bi bi-database"></i></div>
             <div class="editor-title"><small>{{ dataSet.mode==='multiple' ? 'MULTIPLE' : 'SINGLE' }}</small><h1>{{ dataSet.name }}</h1><p>{{ dataSet.mode==='multiple' ? 'Глобальный список объектов, доступный всему проекту.' : 'Один глобальный объект, доступный всему проекту.' }}</p></div>
             <div class="editor-actions"><button class="button ghost" type="button" @click="drawer='data-api'"><i class="bi bi-braces"></i> API</button><button v-if="can('data.edit')" class="button soft" type="button" @click="drawer='data-fields'"><i class="bi bi-sliders2"></i> Поля</button><button v-if="dataSet.mode==='multiple' && can('data.edit')" class="button primary" type="button" @click="createMultipleRecord('data')"><i class="bi bi-plus-lg"></i> Создать</button><button v-if="can('data.edit')" class="button soft danger-soft" type="button" @click="deleteCurrentDataSet"><i class="bi bi-trash3"></i></button><div class="autosave-pill" :class="dataSaveState"><i></i><span>{{ dataAutosaveText }}</span></div></div>
           </div>
@@ -764,6 +787,12 @@ $config = [
               <span class="settings-white-copy"><small>СИСТЕМА</small><strong>База данных</strong><p>{{ databaseInfo.label || 'База данных' }} · {{ databaseInfo.connected ? 'подключено' : 'ошибка соединения' }}</p></span>
               <i class="bi bi-arrow-right settings-white-arrow"></i>
             </button>
+
+            <button class="settings-white-card" type="button" @click="openAbout">
+              <span class="settings-white-icon about"><i class="bi bi-info-circle"></i></span>
+              <span class="settings-white-copy"><small>MATERCMS</small><strong>О продукте</strong><p>Автор, версия, документация и история всех релизов.</p></span>
+              <i class="bi bi-arrow-right settings-white-arrow"></i>
+            </button>
           </div>
 
           <section class="settings-theme-card">
@@ -773,8 +802,8 @@ $config = [
             </div>
             <div class="theme-choice" role="radiogroup" aria-label="Тема интерфейса">
               <button type="button" :class="{active:themeMode==='system'}" @click="setThemeMode('system')"><i class="bi bi-circle-half"></i><span>Системная</span></button>
-              <button type="button" :class="{active:themeMode==='light'}" @click="setThemeMode('light')"><i class="bi bi-sun-fill"></i><span>Светлая</span></button>
-              <button type="button" :class="{active:themeMode==='dark'}" @click="setThemeMode('dark')"><i class="bi bi-moon-stars-fill"></i><span>Тёмная</span></button>
+              <button type="button" :class="{active:themeMode==='light'}" @click="setThemeMode('light')"><i class="bi bi-sun"></i><span>Светлая</span></button>
+              <button type="button" :class="{active:themeMode==='dark'}" @click="setThemeMode('dark')"><i class="bi bi-moon-stars"></i><span>Тёмная</span></button>
             </div>
           </section>
         </section>
@@ -796,13 +825,13 @@ $config = [
             </section>
             <section class="settings-surface api-access-settings-card" :class="{'readonly-panel':!can('settings.edit') || !apiProjectEnabled}">
               <div class="api-access-mode-grid clean-api-mode-grid">
-                <button type="button" class="api-access-mode" :class="{active:state.api_access.mode==='public'}" :disabled="!can('settings.edit') || busy" @click="setApiAccessMode('public')"><span class="api-access-mode-icon public"><i class="bi bi-globe2"></i></span><span><b>Публичный API</b><small>Подходит для сайта, каталога, блога и другого открытого контента.</small></span><i class="bi" :class="state.api_access.mode==='public' ? 'bi-check-circle-fill' : 'bi-circle'"></i></button>
-                <button type="button" class="api-access-mode" :class="{active:state.api_access.mode==='private'}" :disabled="!can('settings.edit') || busy" @click="setApiAccessMode('private')"><span class="api-access-mode-icon private"><i class="bi bi-shield-lock-fill"></i></span><span><b>Приватный API</b><small>Для server-to-server интеграций и закрытых данных.</small></span><i class="bi" :class="state.api_access.mode==='private' ? 'bi-check-circle-fill' : 'bi-circle'"></i></button>
+                <button type="button" class="api-access-mode" :class="{active:state.api_access.mode==='public'}" :disabled="!can('settings.edit') || busy" @click="setApiAccessMode('public')"><span class="api-access-mode-icon public"><i class="bi bi-globe2"></i></span><span><b>Публичный API</b><small>Подходит для сайта, каталога, блога и другого открытого контента.</small></span><i class="bi" :class="state.api_access.mode==='public' ? 'bi-check-circle' : 'bi-circle'"></i></button>
+                <button type="button" class="api-access-mode" :class="{active:state.api_access.mode==='private'}" :disabled="!can('settings.edit') || busy" @click="setApiAccessMode('private')"><span class="api-access-mode-icon private"><i class="bi bi-shield-lock"></i></span><span><b>Приватный API</b><small>Для server-to-server интеграций и закрытых данных.</small></span><i class="bi" :class="state.api_access.mode==='private' ? 'bi-check-circle' : 'bi-circle'"></i></button>
               </div>
               <div v-if="state.api_access.mode==='private'" class="private-api-details clean-private-api">
-                <div class="private-token-summary"><div><small>СЕКРЕТНЫЙ ТОКЕН</small><code>{{ state.api_access.token_prefix || 'fth_live_' }}••••••••••••••••</code><p>Полный секрет показывается только один раз.<template v-if="state.api_access.created_at"> Создан {{ formatDateTime(state.api_access.created_at) }}.</template></p></div><span class="token-safe-icon"><i class="bi bi-key-fill"></i></span></div>
+                <div class="private-token-summary"><div><small>СЕКРЕТНЫЙ ТОКЕН</small><code>{{ state.api_access.token_prefix || 'fth_live_' }}••••••••••••••••</code><p>Полный секрет показывается только один раз.<template v-if="state.api_access.created_at"> Создан {{ formatDateTime(state.api_access.created_at) }}.</template></p></div><span class="token-safe-icon"><i class="bi bi-key"></i></span></div>
                 <div class="private-api-actions"><button v-if="can('settings.edit')" class="button soft" type="button" :disabled="busy" @click="regenerateApiToken"><i class="bi bi-arrow-repeat"></i> Перевыпустить токен</button><button class="button ghost" type="button" @click="drawer='api'"><i class="bi bi-code-slash"></i> Примеры подключения</button></div>
-                <div class="secret-warning"><i class="bi bi-exclamation-triangle-fill"></i><p><b>Не храните токен во frontend.</b> Используйте backend или environment variables.</p></div>
+                <div class="secret-warning"><i class="bi bi-exclamation-triangle"></i><p><b>Не храните токен во frontend.</b> Используйте backend или environment variables.</p></div>
               </div>
               <div v-else class="public-api-details clean-public-api"><i class="bi bi-check2-circle"></i><div><b>Готово для frontend</b><p>Endpoint-ы текущего проекта можно использовать напрямую через <code>fetch()</code>.</p></div><button class="button ghost" type="button" @click="drawer='api'"><i class="bi bi-code-slash"></i> Открыть API</button></div>
             </section>
@@ -833,11 +862,11 @@ $config = [
               <template v-if="state.i18n.enabled">
                 <section class="settings-surface">
                   <div class="settings-section-head"><div><small>ОСНОВНОЙ ЯЗЫК</small><h3>Язык по умолчанию</h3><p>Используется в API, когда язык не указан явно.</p></div></div>
-                  <div class="selected-language-grid clean-selected-language-grid"><button v-for="lang in selectedLanguages" :key="lang.code" type="button" class="selected-language-card" :class="{active:state.i18n.default_language===lang.code}" @click="setDefaultLanguage(lang.code)"><span class="language-code">{{ lang.code.toUpperCase() }}</span><span><strong>{{ lang.name }}</strong><small>{{ lang.native }}</small></span><i class="bi" :class="state.i18n.default_language===lang.code ? 'bi-check-circle-fill' : 'bi-circle'"></i></button></div>
+                  <div class="selected-language-grid clean-selected-language-grid"><button v-for="lang in selectedLanguages" :key="lang.code" type="button" class="selected-language-card" :class="{active:state.i18n.default_language===lang.code}" @click="setDefaultLanguage(lang.code)"><span class="language-code">{{ lang.code.toUpperCase() }}</span><span><strong>{{ lang.name }}</strong><small>{{ lang.native }}</small></span><i class="bi" :class="state.i18n.default_language===lang.code ? 'bi-check-circle' : 'bi-circle'"></i></button></div>
                 </section>
                 <section class="settings-surface language-library-card clean-language-library">
                   <div class="settings-section-head language-head"><div><small>ДОБАВИТЬ ЯЗЫК</small><h3>Доступные языки</h3><p>{{ Object.keys(languageCatalog).length }} языков ISO 639-1.</p></div><label class="language-search"><i class="bi bi-search"></i><input v-model="languageSearch" type="search" placeholder="Найти язык…"></label></div>
-                  <div class="language-grid"><button v-for="lang in filteredLanguages" :key="lang.code" type="button" class="language-option" :class="{selected:languageSelected(lang.code)}" @click="toggleLanguage(lang.code)"><span class="language-code">{{ lang.code.toUpperCase() }}</span><span class="language-name"><strong>{{ lang.name }}</strong><small>{{ lang.native }}</small></span><i class="bi" :class="languageSelected(lang.code) ? 'bi-check-circle-fill' : 'bi-plus-circle'"></i></button></div>
+                  <div class="language-grid"><button v-for="lang in filteredLanguages" :key="lang.code" type="button" class="language-option" :class="{selected:languageSelected(lang.code)}" @click="toggleLanguage(lang.code)"><span class="language-code">{{ lang.code.toUpperCase() }}</span><span class="language-name"><strong>{{ lang.name }}</strong><small>{{ lang.native }}</small></span><i class="bi" :class="languageSelected(lang.code) ? 'bi-check-circle' : 'bi-plus-circle'"></i></button></div>
                 </section>
               </template>
               <section v-else class="settings-surface i18n-disabled-card clean-i18n-disabled"><span><i class="bi bi-globe2"></i></span><div><strong>Один язык — меньше сложности</strong><p>Мультиязычность можно включить позже без изменения структуры проекта.</p></div></section>
@@ -888,6 +917,141 @@ $config = [
               <button class="button primary" type="button" @click="openDatabaseSwitcher"><i class="bi bi-arrow-left-right"></i> Сменить базу данных</button>
             </section>
           </template>
+        </section>
+
+        <section v-else-if="route.kind==='about'" class="explorer-view product-about-page">
+          <div class="breadcrumbs"><button type="button" @click="goRoot">MaterCMS</button><span>›</span><b>О продукте</b></div>
+
+          <div v-if="productAbout" class="product-about-shell product-about-v2">
+            <section class="product-about-hero product-about-hero-v2">
+              <div class="product-about-hero-main">
+                <div class="product-about-brand product-about-brand-v2">
+                  <span class="product-about-logo-wrap">
+                    <img class="logo-light" src="<?=e(asset_url('assets/branding/matercms-wordmark-light.webp'))?>" alt="MaterCMS">
+                    <img class="logo-dark" src="<?=e(asset_url('assets/branding/matercms-wordmark-dark.webp'))?>" alt="MaterCMS">
+                  </span>
+                  <span class="product-open-source-badge"><i class="bi bi-github"></i> Public repository</span>
+                </div>
+                <div class="product-about-hero-copy product-about-hero-copy-v2">
+                  <span class="eyebrow">HEADLESS CMS · PRODUCT HUB</span>
+                  <h1>Контент как источник истины.</h1>
+                  <p>{{ productAbout.product?.description }}</p>
+                  <div class="product-stack-pills"><span v-for="item in productAbout.product?.stack || []" :key="item">{{ item }}</span></div>
+                </div>
+                <div class="product-about-hero-actions product-about-hero-actions-v2">
+                  <a class="button primary" href="https://github.com/DreamerView/mater-cms" target="_blank" rel="noopener"><i class="bi bi-github"></i> GitHub</a>
+                  <button class="button soft" type="button" @click="openProductDocument('readme')"><i class="bi bi-book"></i> README</button>
+                  <button class="button soft" type="button" @click="openProductDocument('documentation')"><i class="bi bi-journal-code"></i> Документация</button>
+                </div>
+              </div>
+              <aside class="product-build-panel">
+                <div class="product-build-panel-head"><span><small>ТЕКУЩАЯ СБОРКА</small><strong>MaterCMS {{ productAbout.product?.version || '—' }}</strong></span><i class="bi bi-box-seam"></i></div>
+                <div class="product-build-grid">
+                  <div><small>Версия</small><strong>{{ productAbout.product?.version || '—' }}</strong></div>
+                  <div><small>Релизов</small><strong>{{ productAbout.build?.release_count || 0 }}</strong></div>
+                  <div><small>Runtime</small><strong>PHP {{ productAbout.build?.php || '—' }}</strong></div>
+                  <div><small>Database</small><strong>{{ productAbout.build?.database || 'Database' }}</strong></div>
+                </div>
+                <div class="product-build-routing"><i class="bi bi-braces"></i><span><small>API routing</small><b>{{ productAbout.build?.api_route_mode || 'auto' }}</b></span></div>
+              </aside>
+            </section>
+
+            <section class="product-principles-grid">
+              <article v-for="item in productAbout.principles || []" :key="item.title">
+                <span><i class="bi" :class="item.icon"></i></span>
+                <div><strong>{{ item.title }}</strong><p>{{ item.description }}</p></div>
+              </article>
+            </section>
+
+            <section class="product-author-section-v2">
+              <div class="product-author-profile-v2 product-author-profile-photo-v3">
+                <div class="product-author-profile-main-v3">
+                  <figure class="product-author-photo-v3">
+                    <img
+                      src="<?=e(asset_url('assets/branding/temirkhan-rustemov-256.webp'))?>"
+                      srcset="<?=e(asset_url('assets/branding/temirkhan-rustemov-256.webp'))?> 256w, <?=e(asset_url('assets/branding/temirkhan-rustemov-512.webp'))?> 512w"
+                      sizes="(max-width: 720px) 92px, 148px"
+                      width="256"
+                      height="256"
+                      loading="lazy"
+                      decoding="async"
+                      alt="Temirkhan Rustemov — автор MaterCMS">
+                  </figure>
+                  <div class="product-author-profile-copy-v3">
+                    <div class="product-author-identity-v2 product-author-identity-photo-v3">
+                      <div><small>АВТОР И РАЗРАБОТЧИК</small><h2>{{ productAbout.author?.name }}</h2><p>{{ productAbout.author?.role }}</p></div>
+                    </div>
+                    <p class="product-author-lead">{{ productAbout.author?.description }}</p>
+                    <p class="product-author-bio">{{ productAbout.author?.bio }}</p>
+                    <div class="product-author-links-v2">
+                      <a v-if="productAbout.author?.github" :href="productAbout.author.github" target="_blank" rel="noopener"><i class="bi bi-github"></i><span><small>GitHub</small><b>{{ productAbout.author.github_handle }}</b></span><i class="bi bi-arrow-up-right"></i></a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="product-author-responsibilities">
+                <small>ЗОНЫ ОТВЕТСТВЕННОСТИ</small>
+                <div class="product-author-responsibility-list"><span v-for="item in productAbout.author?.responsibilities || []" :key="item"><i class="bi bi-check2"></i>{{ item }}</span></div>
+              </div>
+              <div class="product-author-philosophy">
+                <i class="bi bi-quote"></i>
+                <p>MaterCMS не пытается быть конструктором дизайна. Его задача — дать проекту чистую структуру данных, удобное редактирование и API, которому frontend может доверять.</p>
+              </div>
+            </section>
+
+            <section class="product-repositories-section">
+              <div class="product-section-head product-section-head-v2"><div><small>GITHUB</small><h2>Репозитории</h2><p>Исходный код MaterCMS, история разработки и место для issues.</p></div><a class="product-section-link" href="https://github.com/DreamerView" target="_blank" rel="noopener">DreamerView на GitHub <i class="bi bi-arrow-up-right"></i></a></div>
+              <div class="product-repository-grid">
+                <article v-for="repo in productAbout.repositories || []" :key="repo.full_name" class="product-repository-card">
+                  <div class="product-repository-top"><span class="product-repository-icon"><i class="bi bi-github"></i></span><div><small>{{ repo.provider }} · {{ repo.visibility }}</small><h3>{{ repo.full_name }}</h3></div><span class="product-repository-branch"><i class="bi bi-git"></i>{{ repo.branch }}</span></div>
+                  <p>{{ repo.description }}</p>
+                  <div class="product-repository-topics"><span v-for="topic in repo.topics || []" :key="topic">{{ topic }}</span></div>
+                  <div class="product-repository-actions">
+                    <a :href="repo.url" target="_blank" rel="noopener"><i class="bi bi-code-slash"></i> Код</a>
+                    <a :href="repo.issues_url" target="_blank" rel="noopener"><i class="bi bi-record-circle"></i> Issues</a>
+                    <a :href="repo.commits_url" target="_blank" rel="noopener"><i class="bi bi-clock-history"></i> Commits</a>
+                  </div>
+                </article>
+              </div>
+            </section>
+
+            <div class="product-about-secondary-grid">
+              <section class="product-commit-card product-commit-card-v2">
+                <div class="product-section-kicker"><i class="bi bi-git"></i><span><small>ТЕКУЩАЯ СБОРКА</small><strong>Git commit message</strong></span></div>
+                <code>{{ productAbout.build?.current_commit || '—' }}</code>
+                <button class="copy-link" type="button" @click="copy(productAbout.build?.current_commit || '')"><i class="bi bi-copy"></i> Копировать commit</button>
+              </section>
+
+              <section class="product-documents-section product-documents-section-v2">
+                <div class="product-section-head"><div><small>ИСТОЧНИК ИСТИНЫ</small><h2>Документация</h2><p>Файлы текущей сборки открываются прямо в MaterCMS.</p></div></div>
+                <div class="product-document-grid product-document-grid-v2">
+                  <button v-for="doc in productAbout.documents || []" :key="doc.key" class="product-document-card product-document-card-v2" :class="{unavailable:doc.available===false}" type="button" :disabled="doc.available===false" @click="doc.available!==false && openProductDocument(doc.key)">
+                    <span class="product-document-icon"><i class="bi" :class="doc.icon"></i></span>
+                    <span class="product-document-copy"><small>{{ doc.name }}</small><strong>{{ doc.title }}</strong><em v-if="doc.available!==false">{{ formatFileSize(doc.bytes) }}</em><em v-else>Недоступен</em></span>
+                    <i class="bi bi-chevron-right product-document-arrow"></i>
+                  </button>
+                </div>
+              </section>
+            </div>
+
+            <section class="product-releases-section product-releases-section-v2">
+              <div class="product-release-head"><div><small>VERSION.md</small><h2>История MaterCMS</h2><p>Все версии автоматически подтягиваются из VERSION.md этой сборки.</p></div><label class="product-release-search"><i class="bi bi-search"></i><input v-model="aboutReleaseQuery" type="search" placeholder="Версия или изменение…"></label></div>
+              <div v-if="filteredProductReleases.length" class="product-release-list">
+                <details v-for="(release,index) in filteredProductReleases" :key="release.version" class="product-release-card" :open="index===0 && !aboutReleaseQuery">
+                  <summary>
+                    <span class="product-release-marker"></span>
+                    <span class="product-release-version">v{{ release.version }}</span>
+                    <span class="product-release-summary"><strong>{{ release.title }}</strong><small>{{ formatDate(release.date) }} · {{ release.change_count }} {{ plural(release.change_count,'изменение','изменения','изменений') }}</small></span>
+                    <i class="bi bi-chevron-down"></i>
+                  </summary>
+                  <div class="product-release-body">
+                    <section v-for="section in release.sections" :key="section.title"><h3>{{ section.title }}</h3><ul><li v-for="(item,itemIndex) in section.items" :key="itemIndex"><span v-html="renderMarkdownInline(item)"></span></li></ul></section>
+                  </div>
+                </details>
+              </div>
+              <div v-else class="product-release-empty"><i class="bi bi-search"></i><strong>Версия не найдена</strong><p>Попробуйте изменить поисковый запрос.</p></div>
+            </section>
+          </div>
         </section>
 
         <section v-else-if="route.kind==='folder'" class="explorer-view feather-content-browser" @click.self="clearContentSelection" @dragover="contentDragOver($event,route.folderId)" @drop="dropContent($event,route.folderId)">
@@ -965,7 +1129,7 @@ $config = [
             <article v-for="folder in filteredFolders" :key="'f'+folder.id" :data-content-key="'folder:'+folder.id" class="file-card folder-card" :class="{selected:isContentSelected('folder',folder),'drag-target':contentDrag.active && contentDrag.overFolderId===folder.id}" draggable="true" @dragstart="startContentDrag($event,'folder',folder)" @dragend="endContentDrag" @dragover.stop="contentDragOver($event,folder.id)" @dragleave="contentDragLeave" @drop.stop="dropContent($event,folder.id)" @dblclick="openFolder(folder.id)" @contextmenu.prevent.stop="openObjectContext($event,'folder',folder)">
               <button class="card-open" type="button" @click="activateContentItem($event,'folder',folder)" :aria-label="'Выбрать ' + folder.name + '. Двойной клик — открыть'"></button>
               <span class="file-select-mark"><i class="bi bi-check2"></i></span>
-              <div class="file-icon folder"><i class="bi bi-folder-fill"></i></div>
+              <div class="file-icon folder"><i class="bi bi-folder2"></i></div>
               <div class="file-copy"><strong>{{ folder.name }}</strong><small>{{ childCount(folder.id) }} {{ plural(childCount(folder.id),'элемент','элемента','элементов') }}</small></div>
               <span v-if="!folder.api_enabled" class="content-api-off-badge"><i class="bi bi-slash-circle"></i> API выкл.</span>
               <button class="more-button" type="button" @click.stop="openMenu($event,'folder',folder)" aria-label="Действия"><i class="bi bi-three-dots"></i></button>
@@ -974,7 +1138,7 @@ $config = [
             <article v-for="doc in filteredDocuments" :key="'d'+doc.id" :data-content-key="'document:'+doc.id" class="file-card document-card" :class="{selected:isContentSelected('document',doc)}" draggable="true" @dragstart="startContentDrag($event,'document',doc)" @dragend="endContentDrag" @dblclick="openDocument(doc.id)" @contextmenu.prevent.stop="openObjectContext($event,'document',doc)">
               <button class="card-open" type="button" @click="activateContentItem($event,'document',doc)" :aria-label="'Выбрать ' + doc.name + '. Двойной клик — открыть'"></button>
               <span class="file-select-mark"><i class="bi bi-check2"></i></span>
-              <div class="file-icon document"><i class="bi bi-file-earmark-text-fill"></i></div>
+              <div class="file-icon document"><i class="bi bi-file-earmark-text"></i></div>
               <div class="file-copy"><strong>{{ doc.name }}</strong><small>{{ doc.mode==='multiple' ? (doc.item_count + ' ' + plural(doc.item_count,'запись','записи','записей')) : 'Одиночный' }} · {{ formatDate(doc.updated_at) }}</small></div>
               <span v-if="!doc.api_enabled" class="content-api-off-badge"><i class="bi bi-slash-circle"></i> API выкл.</span>
               <button class="more-button" type="button" @click.stop="openMenu($event,'document',doc)" aria-label="Действия"><i class="bi bi-three-dots"></i></button>
@@ -983,7 +1147,7 @@ $config = [
             <article v-for="link in filteredContentLinks" :key="'l'+link.id" :data-content-key="'resource-link:'+link.id" class="file-card resource-link-card" :class="['resource-'+link.resource_type,{selected:isContentSelected('resource-link',link)}]" draggable="true" @dragstart="startContentDrag($event,'resource-link',link)" @dragend="endContentDrag" @dblclick="openLinkedResource(link)" @contextmenu.prevent.stop="openObjectContext($event,'resource-link',link)">
               <button class="card-open" type="button" @click="activateContentItem($event,'resource-link',link)" :aria-label="'Выбрать ' + link.name + '. Двойной клик — открыть источник'"></button>
               <span class="file-select-mark"><i class="bi bi-check2"></i></span>
-              <div class="file-icon resource-link-icon" :class="link.resource_type"><i class="bi" :class="link.resource_type==='form' ? 'bi-ui-checks-grid' : 'bi-database-fill'"></i></div>
+              <div class="file-icon resource-link-icon" :class="link.resource_type"><i class="bi" :class="link.resource_type==='form' ? 'bi-ui-checks-grid' : 'bi-database'"></i></div>
               <div class="file-copy"><strong>{{ link.name }}</strong><small><span class="resource-link-kind">{{ link.resource_type==='form' ? 'Форма' : 'Данные' }}</span><template v-if="link.resource_type==='data'"> · {{ link.mode==='multiple' ? ((link.item_count || 0) + ' ' + plural(link.item_count || 0,'запись','записи','записей')) : 'Один объект' }}</template><template v-else> · источник связан</template></small></div>
               <span class="resource-link-badge"><i class="bi bi-link-45deg"></i> Связано</span>
               <span v-if="!link.api_enabled" class="content-api-off-badge"><i class="bi bi-slash-circle"></i> API выкл.</span>
@@ -1029,7 +1193,7 @@ $config = [
             <div class="language-bar-label"><i class="bi bi-translate"></i><span>Язык</span></div>
             <div class="language-bar-scroll">
               <button v-for="lang in documentLanguages" :key="lang.code" type="button" class="language-chip" :class="{active:editorLanguage===lang.code}" @click="switchEditorLanguage(lang.code)">
-                <span>{{ lang.code.toUpperCase() }}</span><b>{{ lang.name }}</b><i v-if="lang.code===document.i18n.default_language" class="bi bi-star-fill" title="Язык по умолчанию"></i>
+                <span>{{ lang.code.toUpperCase() }}</span><b>{{ lang.name }}</b><i v-if="lang.code===document.i18n.default_language" class="bi bi-star" title="Язык по умолчанию"></i>
               </button>
             </div>
           </div>
@@ -1131,11 +1295,12 @@ $config = [
   <aside v-if="drawer==='nav'" class="drawer left-drawer">
     <div class="drawer-head"><div class="auth-brand compact"><span class="brand-mark" aria-hidden="true"></span><div><strong>MaterCMS</strong><small>Контент</small></div></div><button type="button" class="close-button" @click="drawer=null"><i class="bi bi-x-lg"></i></button></div>
     <nav class="folder-nav">
-      <button class="nav-home" :class="{active:route.kind==='folder' && route.folderId===null}" type="button" @click="openFolder(null); drawer=null"><i class="bi bi-house-door-fill home-symbol"></i><b>Мой контент</b></button>
-      <button v-if="can('data.view')" class="nav-home" :class="{active:route.kind==='data' || route.kind==='data-set'}" type="button" @click="openData"><i class="bi bi-database-fill files-symbol"></i><b>Данные</b></button>
+      <button class="nav-home" :class="{active:route.kind==='folder' && route.folderId===null}" type="button" @click="openFolder(null); drawer=null"><i class="bi bi-house-door home-symbol"></i><b>Мой контент</b></button>
+      <button v-if="can('data.view')" class="nav-home" :class="{active:route.kind==='data' || route.kind==='data-set'}" type="button" @click="openData"><i class="bi bi-database files-symbol"></i><b>Данные</b></button>
       <button v-if="can('files.view')" class="nav-home" :class="{active:route.kind==='files'}" type="button" @click="openFiles"><i class="bi bi-folder2-open files-symbol"></i><b>Файлы</b></button>
       <button v-if="can('forms.view')" class="nav-home" :class="{active:route.kind==='forms' || route.kind==='form'}" type="button" @click="openForms"><i class="bi bi-ui-checks-grid files-symbol"></i><b>Формы</b></button>
       <button v-if="can('settings.view')" class="nav-home" :class="{active:['settings','settings-api','settings-languages','settings-projects','settings-team','database'].includes(route.kind)}" type="button" @click="openSettings"><i class="bi bi-gear files-symbol"></i><b>Настройки</b></button>
+      <button class="nav-home nav-about" :class="{active:route.kind==='about'}" type="button" @click="openAbout"><i class="bi bi-info-circle files-symbol"></i><b>О продукте</b></button>
       <button class="nav-home nav-trash" type="button" @click="openTrash"><i class="bi bi-trash3 files-symbol"></i><b>Корзина</b><small v-if="state.trash_count">{{ state.trash_count }}</small></button>
       <folder-tree :folders="state.folders" :documents="state.documents" :parent-id="null" :active-id="route.kind==='folder'?route.folderId:document?.folder_id" @open="openFolderFromNav"></folder-tree>
     </nav>
@@ -1160,7 +1325,7 @@ $config = [
           <span class="trash-checkbox-ui"><i class="bi bi-check2"></i></span>
         </label>
         <button class="trash-row-main" type="button" @click="toggleTrashSelection(item)">
-          <span class="trash-icon"><i class="bi" :class="item.type==='folder'?'bi-folder-fill':'bi-file-earmark-text-fill'"></i></span><span class="trash-copy"><strong>{{ item.name }}</strong><small>{{ item.type==='folder'?'Папка':'Раздел' }} · {{ item.original_path }}</small><em>Удалено {{ formatDateTime(item.deleted_at) }}</em></span>
+          <span class="trash-icon"><i class="bi" :class="item.type==='folder'?'bi-folder2':'bi-file-earmark-text'"></i></span><span class="trash-copy"><strong>{{ item.name }}</strong><small>{{ item.type==='folder'?'Папка':'Раздел' }} · {{ item.original_path }}</small><em>Удалено {{ formatDateTime(item.deleted_at) }}</em></span>
         </button>
       </article>
     </div>
@@ -1172,7 +1337,7 @@ $config = [
     <div class="drawer-head"><div><small class="eyebrow">ДЛЯ РАЗРАБОТЧИКА</small><h2><i class="bi bi-braces"></i> API</h2></div><button type="button" class="close-button" @click="drawer=null"><i class="bi bi-x-lg"></i></button></div>
     <div class="drawer-body api-panel">
       <div class="api-overview-stack">
-        <div class="api-intro"><span><i class="bi bi-lightning-charge-fill"></i></span><div><h3>Готовый endpoint</h3><p>MaterCMS уже собрал полный адрес с доменом, папкой CMS, проектом и путём раздела. Ничего дописывать вручную не нужно.</p></div></div>
+        <div class="api-intro"><span><i class="bi bi-lightning-charge"></i></span><div><h3>Готовый endpoint</h3><p>MaterCMS уже собрал полный адрес с доменом, папкой CMS, проектом и путём раздела. Ничего дописывать вручную не нужно.</p></div></div>
         <div v-if="currentProject" class="api-project-context"><i class="bi bi-boxes"></i><div><small>ПРОЕКТ</small><b>{{ currentProject.name }}</b><code>/api/{{ currentProject.slug }}/</code></div></div>
         <div class="api-resource-state-card" :class="{disabled: document ? !document.api_enabled : (currentFolder ? !currentFolder.api_enabled : !apiProjectEnabled)}">
           <span><i class="bi" :class="(document ? document.api_enabled : (currentFolder ? currentFolder.api_enabled : apiProjectEnabled)) ? 'bi-broadcast-pin' : 'bi-slash-circle'"></i></span>
@@ -1187,7 +1352,7 @@ $config = [
           <label v-else class="mini-switch-control"><input type="checkbox" :checked="apiProjectEnabled" :disabled="!can('settings.edit') || busy" @change="setProjectApiEnabled($event.target.checked)"><span></span></label>
         </div>
         <div class="api-security-card" :class="state.api_access.mode">
-          <span><i class="bi" :class="state.api_access.mode==='private' ? 'bi-shield-lock-fill' : 'bi-globe2'"></i></span>
+          <span><i class="bi" :class="state.api_access.mode==='private' ? 'bi-shield-lock' : 'bi-globe2'"></i></span>
           <div v-if="state.api_access.mode==='private'"><small>ДОСТУП · PRIVATE</small><b>Требуется секретный токен</b><p>Передавайте его сервер-сервер: <code>Authorization: Bearer $MATERCMS_API_TOKEN</code></p></div>
           <div v-else><small>ДОСТУП · PUBLIC</small><b>Без авторизации</b><p>Endpoint можно вызывать напрямую из браузера, приложения или backend.</p></div>
         </div>
@@ -1212,7 +1377,7 @@ $config = [
         <div class="api-return"><i class="bi bi-diagram-3"></i><div><b>Рекурсивное дерево контента</b><span>{{ apiFullResponse ? 'Полный режим возвращает всё дерево вместе с содержимым каждого раздела.' : 'Режим «Только данные» возвращает всё дерево и описание объектов, но без содержимого разделов.' }}</span></div></div>
 
         <div class="api-folder-cache-config">
-          <span class="api-folder-cache-icon"><i class="bi bi-lightning-charge-fill"></i></span>
+          <span class="api-folder-cache-icon"><i class="bi bi-lightning-charge"></i></span>
           <div class="api-folder-cache-copy"><small>КЕШ ПАПКИ</small><b>Кеш готового JSON</b><p>{{ folderApiSettings.cache_ttl > 0 ? folderApiSettings.cache_backend + ' · TTL ' + folderApiSettings.cache_ttl + ' сек.' : 'Кеш выключен — дерево собирается при каждом запросе.' }}</p></div>
           <select v-model.number="folderApiSettings.cache_ttl" :disabled="!can('content.edit') || folderApiSettingsSaving" @change="saveFolderApiTreeSettings"><option :value="0">Выключен</option><option :value="30">30 секунд</option><option :value="60">1 минута</option><option :value="300">5 минут</option><option :value="900">15 минут</option><option :value="3600">1 час</option></select>
         </div>
@@ -1266,7 +1431,7 @@ $config = [
           <label class="mini-switch-control"><input type="checkbox" :checked="dataSet.api_enabled" :disabled="!can('data.edit') || busy" @change="setDataApiEnabled($event.target.checked)"><span></span></label>
         </div>
         <div class="api-security-card" :class="state.api_access.mode">
-          <span><i class="bi" :class="state.api_access.mode==='private' ? 'bi-shield-lock-fill' : 'bi-globe2'"></i></span>
+          <span><i class="bi" :class="state.api_access.mode==='private' ? 'bi-shield-lock' : 'bi-globe2'"></i></span>
           <div v-if="state.api_access.mode==='private'"><small>ДОСТУП ПРОЕКТА · PRIVATE</small><b>Нужен секретный токен</b><p>Готовые примеры ниже уже добавляют <code>Authorization: Bearer</code>.</p></div>
           <div v-else><small>ДОСТУП ПРОЕКТА · PUBLIC</small><b>Без авторизации</b><p>Endpoint можно читать напрямую из frontend или backend.</p></div>
         </div>
@@ -1320,14 +1485,14 @@ $config = [
     <div class="drawer-head"><div><small class="eyebrow">ПОДКЛЮЧЕНИЕ</small><h2><i class="bi bi-plug"></i> Форма на сайте</h2></div><button type="button" class="close-button" @click="drawer=null"><i class="bi bi-x-lg"></i></button></div>
     <div class="drawer-body api-panel">
       <div class="api-overview-stack">
-        <div class="api-intro"><span><i class="bi bi-send-fill"></i></span><div><h3>Принимайте заявки</h3><p>Отправляйте <b>POST</b> на этот адрес. MaterCMS проверит поля, сохранит вложения и положит заявку во входящие.</p></div></div>
+        <div class="api-intro"><span><i class="bi bi-send"></i></span><div><h3>Принимайте заявки</h3><p>Отправляйте <b>POST</b> на этот адрес. MaterCMS проверит поля, сохранит вложения и положит заявку во входящие.</p></div></div>
         <div class="api-resource-state-card" :class="{disabled:!form.api_enabled}">
           <span><i class="bi" :class="form.api_enabled ? 'bi-broadcast-pin' : 'bi-slash-circle'"></i></span>
           <div><small>API ФОРМЫ</small><b>{{ form.api_enabled ? 'Приём заявок включён' : 'Приём заявок выключен' }}</b><p v-if="!apiProjectEnabled">API проекта выключен глобально. Настройка формы сохранена.</p><p v-else>{{ form.api_enabled ? 'GET-описание и POST формы доступны внешним приложениям.' : 'Endpoint формы сохранён, но GET и POST временно возвращают 404.' }}</p></div>
           <label class="mini-switch-control"><input type="checkbox" :checked="form.api_enabled" :disabled="!can('forms.edit') || busy" @change="setFormApiEnabled($event.target.checked)"><span></span></label>
         </div>
         <div class="api-security-card" :class="state.api_access.mode">
-          <span><i class="bi" :class="state.api_access.mode==='private' ? 'bi-shield-lock-fill' : 'bi-globe2'"></i></span>
+          <span><i class="bi" :class="state.api_access.mode==='private' ? 'bi-shield-lock' : 'bi-globe2'"></i></span>
           <div v-if="state.api_access.mode==='private'"><small>ПРИВАТНАЯ ФОРМА</small><b>POST тоже требует Bearer-токен</b><p>Обычный HTML <code>&lt;form&gt;</code> не умеет безопасно хранить секрет. Отправляйте форму через свой backend/proxy.</p></div>
           <div v-else><small>ПУБЛИЧНАЯ ФОРМА</small><b>Можно подключить напрямую</b><p>HTML или JavaScript может отправлять данные сразу в MaterCMS без токена.</p></div>
         </div>
@@ -1355,7 +1520,7 @@ $config = [
         <div class="api-ai-json-note"><i class="bi bi-braces"></i><span>JSON-пример автоматически добавляется в prompt</span></div>
       </section>
 
-      <div v-if="state.api_access.mode==='private'" class="api-tip private-tip"><i class="bi bi-key-fill"></i><p>Храните <code>MATERCMS_API_TOKEN</code> только на сервере. Для приватного проекта вкладка HTML показывает форму, которая отправляет данные на ваш серверный proxy. PHP/Python/JavaScript(server)/cURL примеры уже добавляют Bearer-токен.</p></div>
+      <div v-if="state.api_access.mode==='private'" class="api-tip private-tip"><i class="bi bi-key"></i><p>Храните <code>MATERCMS_API_TOKEN</code> только на сервере. Для приватного проекта вкладка HTML показывает форму, которая отправляет данные на ваш серверный proxy. PHP/Python/JavaScript(server)/cURL примеры уже добавляют Bearer-токен.</p></div>
       <div v-else class="api-tip"><i class="bi bi-shield-check"></i><p>Для простой защиты от ботов HTML-пример уже содержит скрытое поле <code>_website</code>. Вложения отправляйте как <code>multipart/form-data</code>. Лимит одного вложения — {{ <?=json_encode((int)(cms_config('form_upload_max_mb') ?? 20))?> }} МБ.</p></div>
     </div>
   </aside>
@@ -1562,6 +1727,23 @@ $config = [
     </section>
   </div>
 
+  <div v-if="aboutDocumentLoading || aboutDocument" class="modal-backdrop product-document-modal-backdrop" @mousedown.self="closeProductDocument">
+    <section class="modal-card product-document-modal" role="dialog" aria-modal="true" :aria-label="aboutDocument?.title || 'Документация MaterCMS'">
+      <header class="product-document-modal-head">
+        <div class="product-document-modal-title">
+          <span class="product-document-modal-icon"><i class="bi bi-file-earmark-text"></i></span>
+          <div><small>ДОКУМЕНТАЦИЯ ПРОДУКТА <template v-if="aboutDocument?.name">· {{ aboutDocument.name }}</template></small><h2>{{ aboutDocument?.title || 'Загрузка документа…' }}</h2></div>
+        </div>
+        <button class="close-button" type="button" @click="closeProductDocument" aria-label="Закрыть документ"><i class="bi bi-x-lg"></i></button>
+      </header>
+      <div class="product-document-modal-body">
+        <div v-if="aboutDocumentLoading" class="product-document-loading product-document-modal-loading"><i v-for="n in 12" :key="'doc-modal-line-'+n"></i></div>
+        <article v-else class="product-markdown product-markdown-modal" v-html="renderMarkdown(aboutDocument?.content || '')"></article>
+      </div>
+      <footer v-if="aboutDocument" class="product-document-modal-footer"><span><i class="bi bi-file-earmark-code"></i>{{ aboutDocument.name }}</span><span v-if="aboutDocument.updated_at"><i class="bi bi-clock"></i>{{ formatDate(aboutDocument.updated_at) }}</span></footer>
+    </section>
+  </div>
+
   <div v-if="relationPicker.open && relationPickerField" class="modal-backdrop relation-picker-backdrop" @mousedown.self="closeRelationPicker">
     <section class="modal-card relation-picker-modal" role="dialog" aria-modal="true">
       <div class="modal-head"><div><small class="eyebrow">СВЯЗЬ</small><h2>{{ relationPickerField.label }}</h2><p class="relation-picker-subtitle">{{ relationSource(relationPickerField)?.name }} · {{ relationPickerField.relation_multiple ? 'можно выбрать несколько' : 'одна запись' }}</p></div><button type="button" class="close-button" @click="closeRelationPicker"><i class="bi bi-x-lg"></i></button></div>
@@ -1579,20 +1761,20 @@ $config = [
     <section class="modal-card" :class="{'database-switch-modal':modal==='database-switch','user-access-modal':modal==='create-user' || modal==='edit-user','content-properties-card':modal==='content-properties'}">
       <div class="modal-head"><div><small class="eyebrow">{{ modalEyebrow }}</small><h2>{{ modalTitle }}</h2></div><button type="button" class="close-button" :disabled="modal==='database-switch' && databaseSwitching" @click="modal==='api-token' ? closeApiSecret() : ((modal==='database-switch' && databaseSwitching) ? null : (modal=null))"><i class="bi bi-x-lg"></i></button></div>
       <div v-if="modal==='api-token'" class="api-secret-modal-body">
-        <div class="secret-created-icon"><i class="bi bi-shield-lock-fill"></i></div>
+        <div class="secret-created-icon"><i class="bi bi-shield-lock"></i></div>
         <div class="secret-created-copy"><h3>Токен создан</h3><p>Скопируйте его сейчас и сохраните как секрет на сервере. После закрытия MaterCMS больше не сможет показать полный токен — только перевыпустить новый.</p></div>
         <div class="secret-token-box"><code>{{ apiSecret }}</code><button class="button primary" type="button" @click="copy(apiSecret)"><i class="bi bi-copy"></i> Копировать</button></div>
         <div class="secret-env-example"><small>РЕКОМЕНДУЕМ</small><code>MATERCMS_API_TOKEN={{ apiSecret }}</code><button type="button" @click="copy('MATERCMS_API_TOKEN='+apiSecret)" title="Копировать"><i class="bi bi-copy"></i></button></div>
-        <div class="secret-modal-warning"><i class="bi bi-eye-slash-fill"></i><p><b>Не коммитьте секрет в Git и не вставляйте его в frontend.</b> Используйте <code>.env</code>, секреты хостинга, serverless environment variables или защищённое хранилище.</p></div>
+        <div class="secret-modal-warning"><i class="bi bi-eye-slash"></i><p><b>Не коммитьте секрет в Git и не вставляйте его в frontend.</b> Используйте <code>.env</code>, секреты хостинга, serverless environment variables или защищённое хранилище.</p></div>
         <div class="modal-actions"><button class="button primary wide" type="button" @click="closeApiSecret"><i class="bi bi-check2"></i> Я сохранил токен</button></div>
       </div>
       <form v-if="modal==='database-switch'" @submit.prevent="changeDatabase" class="database-switch-form">
         <div class="database-switch-intro"><span><i class="bi bi-database-gear"></i></span><div><strong>Перенос без потери данных</strong><p>Новая база должна быть пустой. MaterCMS создаст схему, перенесёт все таблицы, сверит количество записей и только затем переключит конфиг.</p></div></div>
         <div class="database-switch-grid">
           <button v-for="(meta,key) in databaseAvailability" :key="key" type="button" class="database-switch-driver" :class="{active:databaseDialog.driver===key,disabled:!meta.available}" :disabled="!meta.available" @click="selectDatabaseDriver(key)">
-            <span class="database-switch-driver-icon"><i class="bi" :class="key==='sqlite' ? 'bi-database-fill' : key==='mysql' ? 'bi-hdd-stack-fill' : 'bi-boxes'"></i></span>
+            <span class="database-switch-driver-icon"><i class="bi" :class="key==='sqlite' ? 'bi-database' : key==='mysql' ? 'bi-hdd-stack' : 'bi-boxes'"></i></span>
             <span><strong>{{ meta.label }}</strong><small>{{ meta.available ? meta.extension + ' доступен' : 'Нет ' + meta.extension }}</small></span>
-            <i class="bi" :class="databaseDialog.driver===key ? 'bi-check-circle-fill' : 'bi-circle'"></i>
+            <i class="bi" :class="databaseDialog.driver===key ? 'bi-check-circle' : 'bi-circle'"></i>
           </button>
         </div>
         <template v-if="databaseDialog.driver!=='sqlite'">
@@ -1613,7 +1795,7 @@ $config = [
             <label v-if="databaseDialog.driver==='pgsql'" class="span-2">SSL PostgreSQL<select v-model="databaseDialog.sslmode"><option value="prefer">Prefer</option><option value="require">Require</option><option value="disable">Disable</option></select></label>
           </div>
         </template>
-        <div v-else class="database-switch-sqlite"><i class="bi bi-lightning-charge-fill"></i><div><strong>SQLite без дополнительной настройки</strong><p>MaterCMS использует локальный файл базы в закрытом каталоге <code>cms/data</code>.</p></div></div>
+        <div v-else class="database-switch-sqlite"><i class="bi bi-lightning-charge"></i><div><strong>SQLite без дополнительной настройки</strong><p>MaterCMS использует локальный файл базы в закрытом каталоге <code>cms/data</code>.</p></div></div>
         <div class="database-switch-warning"><i class="bi bi-exclamation-triangle"></i><p>Не закрывайте вкладку во время переноса. Исходная база не изменяется и остаётся резервной копией после успешного переключения.</p></div>
         <div class="modal-actions"><button class="button ghost" type="button" @click="modal=null" :disabled="databaseSwitching">Отмена</button><button class="button primary" type="submit" :disabled="databaseSwitching || !databaseCanSubmit"><span v-if="databaseSwitching" class="spinner tiny"></span><i v-else class="bi bi-arrow-left-right"></i>{{ databaseSwitching ? 'Переносим…' : 'Проверить и перенести' }}</button></div>
       </form>
@@ -1652,18 +1834,18 @@ $config = [
           <label>Email<input v-model.trim="userDialog.email" type="email" placeholder="name@example.com"></label>
           <label class="span-2">{{ userDialog.id ? 'Новый пароль (необязательно)' : 'Пароль' }}<div class="password-control"><input data-password-input v-model="userDialog.password" type="password" :required="!userDialog.id" minlength="8" placeholder="Минимум 8 символов"><button class="password-toggle" data-password-toggle type="button" aria-label="Показать пароль" aria-pressed="false" title="Показать пароль"><i class="bi bi-eye"></i></button></div></label>
         </div>
-        <div class="user-project-management-note"><span><i class="bi bi-layers-fill"></i></span><div><strong>Доступ настраивается в проектах</strong><p>После создания пользователя откройте «Настройки → Проекты», выберите нужный проект и назначьте роль и права.</p></div></div>
+        <div class="user-project-management-note"><span><i class="bi bi-layers"></i></span><div><strong>Доступ настраивается в проектах</strong><p>После создания пользователя откройте «Настройки → Проекты», выберите нужный проект и назначьте роль и права.</p></div></div>
         <div class="modal-actions user-access-modal-actions"><button class="button ghost" type="button" @click="modal=null">Отмена</button><button class="button primary" :disabled="busy" type="submit">{{ userDialog.id ? 'Сохранить' : 'Создать пользователя' }}</button></div>
       </form>
       <div v-else-if="modal==='link-resource'" class="content-link-picker">
-        <div class="content-link-intro"><span :class="contentLinkDialog.type"><i class="bi" :class="contentLinkDialog.type==='form' ? 'bi-ui-checks-grid' : 'bi-database-fill'"></i></span><div><strong>{{ contentLinkDialog.type==='form' ? 'Формы' : 'Данные' }}</strong><p>Выберите уже созданные ресурсы. MaterCMS добавит только ссылку — источник истины останется в {{ contentLinkDialog.type==='form' ? '«Формах»' : '«Данных»' }}.</p></div></div>
+        <div class="content-link-intro"><span :class="contentLinkDialog.type"><i class="bi" :class="contentLinkDialog.type==='form' ? 'bi-ui-checks-grid' : 'bi-database'"></i></span><div><strong>{{ contentLinkDialog.type==='form' ? 'Формы' : 'Данные' }}</strong><p>Выберите уже созданные ресурсы. MaterCMS добавит только ссылку — источник истины останется в {{ contentLinkDialog.type==='form' ? '«Формах»' : '«Данных»' }}.</p></div></div>
         <div v-if="contentLinkDialog.loading" class="content-link-loading"><span class="spinner"></span><p>Загружаем ресурсы…</p></div>
         <div v-else-if="!contentLinkDialog.items.length" class="content-link-empty"><i class="bi" :class="contentLinkDialog.type==='form' ? 'bi-ui-checks-grid' : 'bi-database'"></i><div><strong>Пока нечего добавлять</strong><p>Сначала создайте {{ contentLinkDialog.type==='form' ? 'форму' : 'данные' }} в соответствующем разделе MaterCMS.</p></div></div>
         <div v-else class="content-link-list">
           <label v-for="item in contentLinkDialog.items" :key="item.id" class="content-link-option" :class="{active:contentLinkDialog.selected.includes(Number(item.id))}">
             <input type="checkbox" :checked="contentLinkDialog.selected.includes(Number(item.id))" @change="toggleContentLinkSelection(item.id)">
             <span class="content-link-check"><i class="bi bi-check2"></i></span>
-            <span class="content-link-option-icon" :class="contentLinkDialog.type"><i class="bi" :class="contentLinkDialog.type==='form' ? 'bi-ui-checks-grid' : 'bi-database-fill'"></i></span>
+            <span class="content-link-option-icon" :class="contentLinkDialog.type"><i class="bi" :class="contentLinkDialog.type==='form' ? 'bi-ui-checks-grid' : 'bi-database'"></i></span>
             <span class="content-link-option-copy"><strong>{{ item.name }}</strong><small v-if="contentLinkDialog.type==='data'">{{ item.mode==='multiple' ? 'Multiple · ' + (item.item_count || 0) + ' записей' : 'Single · один объект' }}</small><small v-else>{{ item.submission_count || 0 }} {{ plural(item.submission_count || 0,'заявка','заявки','заявок') }}</small></span>
             <span v-if="item.api_enabled===false" class="content-link-api-state">API выкл.</span>
           </label>
@@ -1672,7 +1854,7 @@ $config = [
         <div class="modal-actions"><button class="button ghost" type="button" @click="modal=null" :disabled="contentLinkDialog.saving">Отмена</button><button class="button primary" type="button" @click="saveContentLinks" :disabled="contentLinkDialog.loading || contentLinkDialog.saving"><span v-if="contentLinkDialog.saving" class="spinner tiny"></span><i v-else class="bi bi-link-45deg"></i>{{ contentLinkDialog.saving ? 'Сохраняем…' : 'Сохранить' }}</button></div>
       </div>
       <div v-else-if="modal==='content-properties' && contentProperties" class="content-properties-modal">
-        <div class="content-properties-hero"><span :class="contentProperties.type"><i class="bi" :class="contentProperties.type==='folder'?'bi-folder-fill':'bi-file-earmark-text-fill'"></i></span><div><strong>{{ contentProperties.name }}</strong><small>{{ contentProperties.typeLabel }}</small></div></div>
+        <div class="content-properties-hero"><span :class="contentProperties.type"><i class="bi" :class="contentProperties.type==='folder'?'bi-folder2':'bi-file-earmark-text'"></i></span><div><strong>{{ contentProperties.name }}</strong><small>{{ contentProperties.typeLabel }}</small></div></div>
         <dl class="content-properties-grid"><div><dt>Расположение</dt><dd>{{ contentProperties.path }}</dd></div><div><dt>Содержимое</dt><dd>{{ contentProperties.details }}</dd></div><div><dt>Создано</dt><dd>{{ formatDateTime(contentProperties.created_at) }}</dd></div><div><dt>Изменено</dt><dd>{{ formatDateTime(contentProperties.updated_at || contentProperties.created_at) }}</dd></div><div v-if="contentProperties.type==='document' || contentProperties.type==='resource-link'"><dt>Slug</dt><dd><code>{{ contentProperties.slug }}</code></dd></div><div v-if="contentProperties.type==='document'"><dt>Режим</dt><dd>{{ contentProperties.mode==='multiple'?'Multiple / массив':'Single / объект' }}</dd></div><div v-if="contentProperties.type==='resource-link'"><dt>Источник</dt><dd>{{ contentProperties.resource_type==='form' ? 'Формы' : 'Данные' }} · #{{ contentProperties.resource_id }}</dd></div><div v-if="contentProperties.type==='resource-link'"><dt>API</dt><dd>{{ contentProperties.api_enabled ? 'Включён' : 'Выключен' }}</dd></div></dl>
         <div class="modal-actions"><button class="button soft" type="button" @click="copy(contentProperties.path)"><i class="bi bi-copy"></i> Копировать путь</button><button class="button primary" type="button" @click="modal=null">Готово</button></div>
       </div>

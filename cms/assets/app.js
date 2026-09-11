@@ -102,7 +102,15 @@ const app = createApp({
     const formLastSavedAt = ref(null);
     const loading = ref(true);
     const pageNavigating = ref(false);
+    const productAbout = ref(null);
+    const productAboutLoading = ref(false);
+    const aboutReleaseQuery = ref('');
+    const aboutDocument = ref(null);
+    const aboutDocumentLoading = ref(false);
+    let aboutDocumentRequestSeq = 0;
+    const routeSkeletonKind = ref('explorer');
     const routeViewKey = ref(0);
+    let routeTransitionStartedAt = 0;
     const saving = ref(false);
     const busy = ref(false);
     const dirty = ref(false);
@@ -1708,6 +1716,7 @@ const app = createApp({
       const dataRoute = params.get('data-list') === '1';
       const formsRoute = params.get('forms') === '1';
       const files = params.get('files') === '1';
+      const aboutRoute = params.get('about') === '1';
       const settingsValue = params.get('settings');
       const settingsRoute = settingsValue === '1';
       const settingsApiRoute = settingsValue === 'api';
@@ -1721,7 +1730,9 @@ const app = createApp({
       route.folderId = null;
       route.formId = null;
       route.dataSetId = null;
-      if (settingsProjectsRoute || projectsRoute) {
+      if (aboutRoute) {
+        route.kind = 'about';
+      } else if (settingsProjectsRoute || projectsRoute) {
         route.kind = 'settings-projects';
       } else if (settingsTeamRoute || usersRoute) {
         route.kind = 'settings-team';
@@ -1754,7 +1765,8 @@ const app = createApp({
       }
     };
 
-    const routeUrl = ({ folder = null, doc = null, files = false, forms: formsRoute = false, form = null, data: dataSet = null, dataList = false, settings = false, database = false, projects: projectsRoute = false, users: usersRoute = false } = {}) => {
+    const routeUrl = ({ folder = null, doc = null, files = false, forms: formsRoute = false, form = null, data: dataSet = null, dataList = false, settings = false, database = false, projects: projectsRoute = false, users: usersRoute = false, about = false } = {}) => {
+      if (about) return `${baseUrl}?about=1`;
       if (projectsRoute) return `${baseUrl}?settings=projects`;
       if (usersRoute) return `${baseUrl}?settings=team`;
       if (database) return `${baseUrl}?database=1`;
@@ -2156,6 +2168,97 @@ const app = createApp({
       } finally { usersLoading.value = false; }
     };
 
+    const loadProductAbout = async (force = false) => {
+      if (productAbout.value && !force) return productAbout.value;
+      productAboutLoading.value = true;
+      try {
+        const payload = await apiGet('product_about');
+        productAbout.value = payload;
+        return payload;
+      } finally {
+        productAboutLoading.value = false;
+      }
+    };
+
+    const filteredProductReleases = computed(() => {
+      const releases = Array.isArray(productAbout.value?.releases) ? productAbout.value.releases : [];
+      const query = aboutReleaseQuery.value.trim().toLowerCase();
+      if (!query) return releases;
+      return releases.filter(release => {
+        const haystack = [release.version,release.title,...(release.sections || []).flatMap(section => [section.title,...(section.items || [])])].join(' ').toLowerCase();
+        return haystack.includes(query);
+      });
+    });
+
+    const openProductDocument = async key => {
+      const requestId = ++aboutDocumentRequestSeq;
+      aboutDocument.value = null;
+      aboutDocumentLoading.value = true;
+      try {
+        const payload = await apiGet('product_document', { document:key });
+        if (requestId !== aboutDocumentRequestSeq) return;
+        aboutDocument.value = payload.document || null;
+      } catch (error) {
+        if (requestId !== aboutDocumentRequestSeq) return;
+        notify(error.message || 'Не удалось открыть документ.', 'error');
+      } finally {
+        if (requestId === aboutDocumentRequestSeq) aboutDocumentLoading.value = false;
+      }
+    };
+
+    const closeProductDocument = () => {
+      aboutDocumentRequestSeq += 1;
+      aboutDocumentLoading.value = false;
+      aboutDocument.value = null;
+    };
+
+    const escapeMarkdownHtml = value => String(value ?? '')
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+
+    const renderMarkdownInline = value => {
+      let html = escapeMarkdownHtml(value);
+      html = html.replace(/`([^`]+)`/g,'<code>$1</code>');
+      html = html.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+      html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g,(_m,label,url) => {
+        const safeUrl = /^(?:https?:|mailto:|#|\.\.?\/)/i.test(url) ? url : '#';
+        return `<a href="${escapeMarkdownHtml(safeUrl)}" target="_blank" rel="noopener noreferrer">${label}</a>`;
+      });
+      return html;
+    };
+
+    const renderMarkdown = markdown => {
+      const lines = String(markdown || '').split(/\r?\n/);
+      const out = [];
+      let inCode = false;
+      let code = [];
+      let list = null;
+      const closeList = () => { if (list) { out.push(`</${list}>`); list = null; } };
+      for (const raw of lines) {
+        const line = raw || '';
+        if (/^```/.test(line.trim())) {
+          closeList();
+          if (inCode) { out.push(`<pre><code>${escapeMarkdownHtml(code.join('\n'))}</code></pre>`); code=[]; inCode=false; }
+          else inCode=true;
+          continue;
+        }
+        if (inCode) { code.push(line); continue; }
+        if (/^\s*<(?:\/?picture|source|img|\/?p\b)/i.test(line)) continue;
+        if (!line.trim()) { closeList(); continue; }
+        const heading = line.match(/^(#{1,6})\s+(.+)$/);
+        if (heading) { closeList(); const level=Math.min(6,heading[1].length+1); out.push(`<h${level}>${renderMarkdownInline(heading[2])}</h${level}>`); continue; }
+        const bullet = line.match(/^\s*[-*]\s+(.+)$/);
+        if (bullet) { if(list!=='ul'){closeList();list='ul';out.push('<ul>');} out.push(`<li>${renderMarkdownInline(bullet[1])}</li>`); continue; }
+        const ordered = line.match(/^\s*\d+[.)]\s+(.+)$/);
+        if (ordered) { if(list!=='ol'){closeList();list='ol';out.push('<ol>');} out.push(`<li>${renderMarkdownInline(ordered[1])}</li>`); continue; }
+        closeList();
+        if (/^---+$/.test(line.trim())) { out.push('<hr>'); continue; }
+        out.push(`<p>${renderMarkdownInline(line)}</p>`);
+      }
+      if (inCode) out.push(`<pre><code>${escapeMarkdownHtml(code.join('\n'))}</code></pre>`);
+      closeList();
+      return out.join('');
+    };
+
     const syncRoute = async () => {
       parseRoute();
       search.value = '';
@@ -2208,6 +2311,7 @@ const app = createApp({
         dataDirty.value = false;
         cleanupPreviews();
         cleanupDataPreviews();
+        if (route.kind === 'about') await loadProductAbout();
         if (route.kind === 'files') await loadFiles();
         if (route.kind === 'data') await loadDataSets();
         if (route.kind === 'forms') await loadForms();
@@ -2233,14 +2337,69 @@ const app = createApp({
       return !formDirty.value && !formSaving.value;
     };
 
-    const beginRouteTransition = async () => {
-      pageNavigating.value = true;
-      await new Promise(resolve => window.setTimeout(resolve, 250));
+    const skeletonKindFromRouteKind = kind => {
+      if (['document','data-set','form'].includes(kind)) return 'editor';
+      if (['settings','settings-api','settings-languages','database'].includes(kind)) return 'settings';
+      if (['settings-projects','settings-team','about'].includes(kind)) return 'management';
+      return 'explorer';
     };
+
+    const routeKindFromTarget = target => {
+      if (!target) {
+        const params = new URLSearchParams(window.location.search);
+        const settings = params.get('settings');
+        if (params.get('about') === '1') return 'about';
+        if (settings === 'projects' || params.get('projects') === '1') return 'settings-projects';
+        if (settings === 'team' || params.get('users') === '1') return 'settings-team';
+        if (params.get('database') === '1') return 'database';
+        if (settings === 'api') return 'settings-api';
+        if (settings === 'languages') return 'settings-languages';
+        if (Number(params.get('data') || 0) > 0) return 'data-set';
+        if (params.get('data-list') === '1') return 'data';
+        if (Number(params.get('form') || 0) > 0) return 'form';
+        if (params.get('forms') === '1') return 'forms';
+        if (settings === '1') return 'settings';
+        if (params.get('files') === '1') return 'files';
+        if (Number(params.get('doc') || 0) > 0) return 'document';
+        return 'folder';
+      }
+      if (target.about) return 'about';
+      if (target.projects || target.settings === 'projects') return 'settings-projects';
+      if (target.users || target.settings === 'team') return 'settings-team';
+      if (target.database) return 'database';
+      if (target.settings === 'api') return 'settings-api';
+      if (target.settings === 'languages') return 'settings-languages';
+      if (target.data) return 'data-set';
+      if (target.dataList) return 'data';
+      if (target.form) return 'form';
+      if (target.forms) return 'forms';
+      if (target.settings) return 'settings';
+      if (target.files) return 'files';
+      if (target.doc) return 'document';
+      return 'folder';
+    };
+
+    const beginRouteTransition = target => {
+      routeSkeletonKind.value = skeletonKindFromRouteKind(routeKindFromTarget(target));
+      routeTransitionStartedAt = performance.now();
+      pageNavigating.value = true;
+      document.documentElement.classList.add('matercms-route-loading');
+    };
+
     const finishRouteTransition = async () => {
+      // Navigation starts immediately. A very small minimum visibility window keeps
+      // the skeleton perceptible without delaying the request itself. Slow routes
+      // naturally remain visible for their real load duration.
+      const minimumVisibleMs = 120;
+      const elapsed = performance.now() - routeTransitionStartedAt;
+      if (elapsed < minimumVisibleMs) {
+        await new Promise(resolve => window.setTimeout(resolve, minimumVisibleMs - elapsed));
+      }
       routeViewKey.value += 1;
       await nextTick();
-      requestAnimationFrame(() => { pageNavigating.value = false; });
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      pageNavigating.value = false;
+      document.documentElement.classList.remove('matercms-route-loading');
     };
 
     const navigate = async target => {
@@ -2255,7 +2414,7 @@ const app = createApp({
         if (!allowed) return false;
       }
       resetGlobalSearch();
-      await beginRouteTransition();
+      beginRouteTransition(target);
       try {
         history.pushState({}, '', routeUrl(target));
         await syncRoute();
@@ -2263,6 +2422,7 @@ const app = createApp({
         await finishRouteTransition();
       } catch (error) {
         pageNavigating.value = false;
+        document.documentElement.classList.remove('matercms-route-loading');
         throw error;
       }
       return true;
@@ -2276,6 +2436,7 @@ const app = createApp({
     const openDataSet = id => { drawer.value = null; return navigate({ data: id }); };
     const openForms = () => { drawer.value = null; return navigate({ forms: true }); };
     const openSettings = () => { drawer.value = null; return navigate({ settings: true }); };
+    const openAbout = () => { drawer.value = null; return navigate({ about: true }); };
     const openApiSettings = () => { drawer.value = null; return navigate({ settings: 'api' }); };
     const openLanguageSettings = () => { drawer.value = null; return navigate({ settings: 'languages' }); };
     const openTeamSettings = () => { drawer.value = null; return navigate({ settings: 'team' }); };
@@ -2728,6 +2889,7 @@ const app = createApp({
 
     const refreshCurrentContext = async () => {
       if (route.kind === 'folder') { await loadState(); return; }
+      if (route.kind === 'about') { await loadProductAbout(true); return; }
       if (route.kind === 'files') { await loadFiles(); return; }
       if (route.kind === 'data') { await loadDataSets(); return; }
       if (route.kind === 'forms') { await loadForms(); return; }
@@ -2911,7 +3073,7 @@ const app = createApp({
       if (route.kind === 'data-set' && !(await flushDataAutosave())) return;
       if (route.kind === 'form' && !(await flushFormAutosave())) return;
       const stayOnProjects = route.kind === 'settings-projects';
-      await beginRouteTransition();
+      beginRouteTransition(stayOnProjects ? { settings:'projects' } : {});
       try {
         const payload = await apiPost('switch_project', { project_id: project.id });
         applyState(payload.state);
@@ -2930,7 +3092,7 @@ const app = createApp({
         }
         await finishRouteTransition();
         notify(`Выбран проект «${payload.state?.current_project?.name || project.name}».`);
-      } catch (error) { pageNavigating.value = false; notify(error.message || 'Не удалось выбрать проект.', 'error'); }
+      } catch (error) { pageNavigating.value = false; document.documentElement.classList.remove('matercms-route-loading'); notify(error.message || 'Не удалось выбрать проект.', 'error'); }
     };
     const selectProjectForAccess = event => {
       const id = Number(event?.target?.value || 0);
@@ -4390,6 +4552,7 @@ const app = createApp({
         route.kind === 'files' ? { files: true } :
         route.kind === 'forms' ? { forms: true } :
         route.kind === 'data' ? { dataList: true } :
+        route.kind === 'about' ? { about: true } :
         route.kind === 'settings' ? { settings: true } :
         route.kind === 'settings-api' ? { settings: 'api' } :
         route.kind === 'settings-languages' ? { settings: 'languages' } :
@@ -4409,12 +4572,13 @@ const app = createApp({
         return;
       }
       resetGlobalSearch();
-      await beginRouteTransition();
+      beginRouteTransition();
       try {
         await syncRoute();
         await finishRouteTransition();
       } catch (error) {
         pageNavigating.value = false;
+        document.documentElement.classList.remove('matercms-route-loading');
         throw error;
       }
     };
@@ -4433,6 +4597,15 @@ const app = createApp({
     };
 
     const handleKey = event => {
+      const productDocumentOpen = aboutDocumentLoading.value || Boolean(aboutDocument.value);
+      if (productDocumentOpen) {
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          closeProductDocument();
+        }
+        return;
+      }
+
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault();
         globalSearchOpen.value = true;
@@ -4552,8 +4725,8 @@ const app = createApp({
       cleanupDataPreviews();
       if (dataAutosaveTimer) window.clearTimeout(dataAutosaveTimer);
       if (globalSearchTimer) window.clearTimeout(globalSearchTimer);
-      document.documentElement.classList.remove('drive-preview-open');
-      document.body.classList.remove('drive-preview-open');
+      document.documentElement.classList.remove('drive-preview-open','product-document-open');
+      document.body.classList.remove('drive-preview-open','product-document-open');
       window.removeEventListener('popstate', handlePopState);
       window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener('resize', handleViewportContextClose);
@@ -4561,6 +4734,12 @@ const app = createApp({
       document.removeEventListener('click', handleGlobalClick);
       document.removeEventListener('keydown', handleKey);
       systemThemeQuery.removeEventListener?.('change', handleSystemThemeChange);
+    });
+
+    watch([aboutDocument, aboutDocumentLoading], ([documentValue, loadingValue]) => {
+      const method = (Boolean(documentValue) || loadingValue) ? 'add' : 'remove';
+      document.documentElement.classList[method]('product-document-open');
+      document.body.classList[method]('product-document-open');
     });
 
     watch(selectedFile, value => {
@@ -4610,6 +4789,13 @@ const app = createApp({
       formTypeNames,
       loading,
       pageNavigating,
+      productAbout,
+      productAboutLoading,
+      aboutReleaseQuery,
+      filteredProductReleases,
+      aboutDocument,
+      aboutDocumentLoading,
+      routeSkeletonKind,
       routeViewKey,
       saving,
       busy,
@@ -4802,6 +4988,11 @@ const app = createApp({
       openDataSet,
       openForms,
       openSettings,
+      openAbout,
+      openProductDocument,
+      closeProductDocument,
+      renderMarkdown,
+      renderMarkdownInline,
       openApiSettings,
       openLanguageSettings,
       openProjectSettings,

@@ -1311,12 +1311,217 @@ function clipboard_copy_folder_tree(PDO $pdo, int $folderId, int $destinationFol
 }
 
 
+/**
+ * Product metadata is sourced from repository Markdown files so the About page
+ * never drifts away from the release documentation shipped with MaterCMS.
+ */
+function product_markdown_path(string $filename): string
+{
+    // MaterCMS ships synchronized Markdown files both in the project root and
+    // inside /cms. Production deployments often publish only /cms, so the
+    // runtime copy must be preferred and the repository root is only fallback.
+    $cmsRoot = dirname(__DIR__);
+    $projectRoot = dirname($cmsRoot);
+    $candidates = [
+        $cmsRoot . DIRECTORY_SEPARATOR . $filename,
+        $projectRoot . DIRECTORY_SEPARATOR . $filename,
+    ];
+
+    foreach ($candidates as $candidate) {
+        if (!is_file($candidate) || !is_readable($candidate)) continue;
+        $size = @filesize($candidate);
+        if ($size === false || $size <= 0) continue;
+        return $candidate;
+    }
+
+    // Return the expected runtime path so diagnostics stay deterministic.
+    return $cmsRoot . DIRECTORY_SEPARATOR . $filename;
+}
+
+function product_markdown_files(): array
+{
+    return [
+        'readme' => ['name'=>'README.md','title'=>'README','description'=>'Краткое описание продукта, архитектуры и актуальных возможностей.','path'=>product_markdown_path('README.md'),'icon'=>'bi-book'],
+        'documentation' => ['name'=>'DOCUMENTATION.md','title'=>'Documentation','description'=>'Подробное руководство по интерфейсу, API, данным, формам и эксплуатации.','path'=>product_markdown_path('DOCUMENTATION.md'),'icon'=>'bi-journal-code'],
+        'versions' => ['name'=>'VERSION.md','title'=>'Version History','description'=>'Полная история релизов MaterCMS по версиям.','path'=>product_markdown_path('VERSION.md'),'icon'=>'bi-clock-history'],
+        'commit' => ['name'=>'commit.md','title'=>'Current Commit','description'=>'Текущее сообщение для git commit -m этой сборки.','path'=>product_markdown_path('commit.md'),'icon'=>'bi-git'],
+    ];
+}
+
+function product_read_file(string $path): string
+{
+    if (!is_file($path) || !is_readable($path)) return '';
+    $content = file_get_contents($path);
+    return is_string($content) ? $content : '';
+}
+
+function product_plain_excerpt(string $markdown, int $limit = 260): string
+{
+    $text = preg_replace('/```.*?```/s', ' ', $markdown) ?? $markdown;
+    $text = preg_replace('/<[^>]+>/', ' ', $text) ?? $text;
+    $text = preg_replace('/^#{1,6}\s+/m', '', $text) ?? $text;
+    $text = preg_replace('/[`*_>#\[\]()~-]+/', ' ', $text) ?? $text;
+    $text = preg_replace('/\s+/u', ' ', trim($text)) ?? trim($text);
+    if (function_exists('mb_strlen') && mb_strlen($text) > $limit) return mb_substr($text, 0, $limit - 1) . '…';
+    if (strlen($text) > $limit) return substr($text, 0, $limit - 1) . '…';
+    return $text;
+}
+
+function product_parse_releases(string $markdown): array
+{
+    $lines = preg_split('/\R/u', $markdown) ?: [];
+    $releases = [];
+    $release = null;
+    $section = null;
+
+    $flush = static function () use (&$releases, &$release): void {
+        if (!$release) return;
+        $release['change_count'] = array_sum(array_map(static fn($s) => count($s['items'] ?? []), $release['sections']));
+        $releases[] = $release;
+        $release = null;
+    };
+
+    foreach ($lines as $line) {
+        $line = rtrim((string)$line);
+        if (preg_match('/^##\s+([0-9]{4}\.[0-9]{2}\.[0-9]{2}\.[0-9]+)\s+[—-]\s+(.+)$/u', $line, $match)) {
+            $flush();
+            $release = [
+                'version' => trim($match[1]),
+                'title' => trim($match[2]),
+                'date' => str_replace('.', '-', substr(trim($match[1]), 0, 10)),
+                'sections' => [],
+                'change_count' => 0,
+            ];
+            $section = null;
+            continue;
+        }
+        if (!$release) continue;
+        if (preg_match('/^###\s+(.+)$/u', $line, $match)) {
+            $release['sections'][] = ['title'=>trim($match[1]),'items'=>[]];
+            $section = count($release['sections']) - 1;
+            continue;
+        }
+        if (preg_match('/^[-*]\s+(.+)$/u', $line, $match)) {
+            if ($section === null) {
+                $release['sections'][] = ['title'=>'Изменения','items'=>[]];
+                $section = count($release['sections']) - 1;
+            }
+            $release['sections'][$section]['items'][] = trim($match[1]);
+        }
+    }
+    $flush();
+    return $releases;
+}
+
+function product_about_payload(PDO $pdo): array
+{
+    $files = product_markdown_files();
+    $versionMarkdown = product_read_file($files['versions']['path']);
+    $readme = product_read_file($files['readme']['path']);
+    $commit = trim(product_read_file($files['commit']['path']));
+    $releases = product_parse_releases($versionMarkdown);
+    $version = $releases[0]['version'] ?? '';
+    if ($version === '' && preg_match('/Текущая версия:\s*\*\*([^*]+)\*\*/u', $versionMarkdown, $m)) $version = trim($m[1]);
+
+    $documents = [];
+    foreach ($files as $key => $file) {
+        $content = product_read_file($file['path']);
+        $documents[] = [
+            'key'=>$key,
+            'name'=>$file['name'],
+            'title'=>$file['title'],
+            'description'=>$file['description'],
+            'icon'=>$file['icon'],
+            'available'=>$content !== '',
+            'bytes'=>is_file($file['path']) ? (int)filesize($file['path']) : 0,
+            'updated_at'=>is_file($file['path']) ? date(DATE_ATOM, (int)filemtime($file['path'])) : null,
+            'excerpt'=>product_plain_excerpt($content),
+        ];
+    }
+
+    $dbInfo = Database::publicInfo();
+    return [
+        'ok'=>true,
+        'product'=>[
+            'name'=>'MaterCMS',
+            'version'=>$version,
+            'tagline'=>'Контент без лишнего',
+            'description'=>'Лёгкая headless CMS, где контент остаётся единственным источником истины, а frontend получает чистый и предсказуемый API.',
+            'stack'=>['PHP 8.1+','Vue 3','SQLite / MySQL / PostgreSQL','REST JSON API'],
+        ],
+        'author'=>[
+            'name'=>'Temirkhan Rustemov',
+            'role'=>'Автор, архитектор и разработчик MaterCMS',
+            'description'=>'Разрабатывает MaterCMS как цельный продукт: от архитектуры хранения контента и public API до интерфейса администратора, производительности и UX.',
+            'bio'=>'Full-stack разработчик, который проектирует MaterCMS вокруг одной идеи: CMS должна хранить истину данных и не навязывать frontend способ отображения контента.',
+            'responsibilities'=>['Product architecture','Backend & Core','Public API','Frontend & UX','Performance','Release engineering'],
+            'github'=>'https://github.com/DreamerView',
+            'github_handle'=>'@DreamerView',
+            'photo'=>'assets/branding/temirkhan-rustemov-256.webp',
+            'photo_2x'=>'assets/branding/temirkhan-rustemov-512.webp',
+        ],
+        'repositories'=>[
+            [
+                'provider'=>'GitHub',
+                'owner'=>'DreamerView',
+                'name'=>'mater-cms',
+                'full_name'=>'DreamerView/mater-cms',
+                'url'=>'https://github.com/DreamerView/mater-cms',
+                'issues_url'=>'https://github.com/DreamerView/mater-cms/issues',
+                'commits_url'=>'https://github.com/DreamerView/mater-cms/commits/main',
+                'branch'=>'main',
+                'visibility'=>'Public',
+                'description'=>'Лёгкая headless CMS на PHP + Vue 3 SPA без npm, Vite и build-step. SQLite, MySQL и PostgreSQL.',
+                'topics'=>['PHP','Vue 3','Headless CMS','REST API','SQLite','MySQL','PostgreSQL'],
+            ],
+        ],
+        'principles'=>[
+            ['icon'=>'bi-database-check','title'=>'Один источник истины','description'=>'Контент живёт в MaterCMS, а сайт или приложение только получает его через предсказуемый API.'],
+            ['icon'=>'bi-braces-asterisk','title'=>'API-first','description'=>'Папки, разделы, Данные и Формы сразу готовы к интеграции без привязки к шаблонам frontend.'],
+            ['icon'=>'bi-lightning-charge','title'=>'Без лишней инфраструктуры','description'=>'PHP + Vue 3 без обязательного npm build-step. Установка адаптируется под доступную СУБД и сервер.'],
+        ],
+        'build'=>[
+            'php'=>PHP_VERSION,
+            'database'=>(string)($dbInfo['label'] ?? $dbInfo['driver'] ?? 'Database'),
+            'database_driver'=>(string)($dbInfo['driver'] ?? ''),
+            'api_route_mode'=>(string)(cms_config('api_route_mode') ?? 'auto'),
+            'release_count'=>count($releases),
+            'current_commit'=>$commit,
+        ],
+        'documents'=>$documents,
+        'releases'=>$releases,
+        'readme_excerpt'=>product_plain_excerpt($readme, 420),
+    ];
+}
+
+function product_document_payload(string $key): array
+{
+    $files = product_markdown_files();
+    if (!isset($files[$key])) throw new RuntimeException('Документ не найден.');
+    $file = $files[$key];
+    $content = product_read_file($file['path']);
+    if ($content === '') throw new RuntimeException('Документ пуст или недоступен.');
+    return [
+        'ok'=>true,
+        'document'=>[
+            'key'=>$key,
+            'name'=>$file['name'],
+            'title'=>$file['title'],
+            'content'=>$content,
+            'updated_at'=>date(DATE_ATOM, (int)filemtime($file['path'])),
+        ],
+    ];
+}
+
+
 $initialPayload = $method === 'POST' ? api_payload() : [];
 $requestedProjectId = $_GET['project_id'] ?? ($initialPayload['project_id'] ?? null);
 $project = ProjectAccess::currentProject($pdo, $user, $requestedProjectId);
 
 try {
     if ($method === 'GET') {
+        if ($action === 'product_about') json_response(product_about_payload($pdo));
+        if ($action === 'product_document') json_response(product_document_payload((string)($_GET['document'] ?? '')));
         if ($action === 'state') json_response(admin_state($pdo, $user, $project));
         if ($action === 'forms') { ProjectAccess::requirePermission($pdo,$user,(int)$project['id'],'forms.view'); json_response(['ok' => true, 'forms' => admin_forms($pdo,$project)]); }
         if ($action === 'data_sets') { ProjectAccess::requirePermission($pdo,$user,(int)$project['id'],'data.view'); json_response(['ok'=>true,'data_sets'=>admin_data_sets($pdo,$project)]); }

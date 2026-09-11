@@ -1,1 +1,1 @@
-feat(ux): remove cut and add preloader, route delay and trash selection
+feat(ui): unify MaterCMS icons with Apple-inspired styling
