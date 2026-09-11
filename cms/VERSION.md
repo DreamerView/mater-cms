@@ -9,7 +9,7 @@
 </p>
 
 
-Текущая версия: **2026.09.11.15**
+Текущая версия: **2026.09.11.16**
 
 Формат версии: `YYYY.MM.DD.N`, где `N` — порядковый номер сборки MaterCMS за день.
 
@@ -19,6 +19,38 @@
 - `DOCUMENTATION.md` — подробное руководство и техническое поведение;
 - `VERSION.md` — история изменений по версиям;
 - `commit.md` и `cms/commit.md` — синхронные файлы с одной текущей строкой для `git commit -m`.
+
+---
+
+## 2026.09.11.16 — Mobile Safari and modal hardening
+
+### iOS input stability
+
+- Все текстовые `input`, `textarea` и `select` на mobile используют стабильный `16px`, поэтому Safari не выполняет автоматический zoom при фокусе.
+- MaterCMS не запрещает ручное масштабирование страницы и не использует `user-scalable=no`.
+- Размер шрифта поля не меняется между normal/focus состояниями.
+
+### Post / Redirect / Get
+
+- Авторизация после любого POST завершается `303 See Other` и чистым GET.
+- Установщик, выбор/сброс базы и создание первого администратора также переведены на PRG.
+- Ошибки формы передаются через session flash; DB password, connection URL и пользовательские пароли в flash не сохраняются.
+- Устранено системное предупреждение браузера о повторной отправке формы после refresh.
+
+### Full-screen modals
+
+- Добавлен общий mobile fullscreen contract на `100dvh`.
+- Исправлен `database-switch`: backdrop больше не оставляет внешний padding вокруг `100vw/100dvh` modal.
+- Full-screen cards работают как flex-column; header/footer фиксированы внутри поверхности, прокручивается только содержимое.
+- Добавлены `safe-area-inset-top/bottom`, `overscroll-behavior` и iOS momentum scrolling.
+- Унифицированы record editor, relation picker, product documentation, user editor и file preview.
+- При открытой модалке фон страницы больше не прокручивается.
+
+### Проверки
+
+- PHP syntax check для всего `cms`.
+- `node --check` для `app.js` и `ui.js`.
+- CSS structure и ZIP integrity.
 
 ---
 

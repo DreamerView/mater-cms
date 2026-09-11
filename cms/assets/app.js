@@ -4725,8 +4725,8 @@ const app = createApp({
       cleanupDataPreviews();
       if (dataAutosaveTimer) window.clearTimeout(dataAutosaveTimer);
       if (globalSearchTimer) window.clearTimeout(globalSearchTimer);
-      document.documentElement.classList.remove('drive-preview-open','product-document-open');
-      document.body.classList.remove('drive-preview-open','product-document-open');
+      document.documentElement.classList.remove('drive-preview-open','product-document-open','matercms-modal-open');
+      document.body.classList.remove('drive-preview-open','product-document-open','matercms-modal-open');
       window.removeEventListener('popstate', handlePopState);
       window.removeEventListener('beforeunload', handleBeforeUnload);
       window.removeEventListener('resize', handleViewportContextClose);
@@ -4740,6 +4740,21 @@ const app = createApp({
       const method = (Boolean(documentValue) || loadingValue) ? 'add' : 'remove';
       document.documentElement.classList[method]('product-document-open');
       document.body.classList[method]('product-document-open');
+    });
+
+    watch([
+      modal,
+      () => Boolean(recordDialog.open),
+      () => Boolean(relationPicker.open),
+      () => Boolean(confirmDialog.open),
+      aboutDocument,
+      aboutDocumentLoading,
+      selectedFile,
+    ], values => {
+      const open = values.some(Boolean);
+      const method = open ? 'add' : 'remove';
+      document.documentElement.classList[method]('matercms-modal-open');
+      document.body.classList[method]('matercms-modal-open');
     });
 
     watch(selectedFile, value => {

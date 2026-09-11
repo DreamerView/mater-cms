@@ -7569,3 +7569,139 @@ html[data-theme="dark"] .file-icon.document .bi{color:var(--mater-icon-fg)!impor
 @media(prefers-reduced-motion:reduce){
   .icon-button,.close-button,.more-button,.back-button,.remove-field,.search-clear{transition:none!important}
 }
+
+
+/* ========================================================================== 
+   v2026.09.11.16 — iOS input stability + fullscreen modal hardening
+   ========================================================================== */
+html.matercms-modal-open,
+body.matercms-modal-open{
+  overflow:hidden!important;
+  overscroll-behavior:none!important;
+}
+
+/* Safari zooms focused controls when their computed font-size is below 16px.
+   Keep one stable mobile text size instead of changing typography on focus. */
+@media(max-width:720px){
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]):not([type="hidden"]),
+  textarea,
+  select{
+    font-size:16px!important;
+    -webkit-text-size-adjust:100%!important;
+    text-size-adjust:100%!important;
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus{
+    font-size:16px!important;
+  }
+
+  /* Shared fullscreen contract: the backdrop owns the viewport, the card
+     owns one flex column, and only its content area may scroll. */
+  .mobile-fullscreen-backdrop,
+  .record-modal-backdrop,
+  .relation-picker-backdrop,
+  .product-document-modal-backdrop{
+    position:fixed!important;
+    inset:0!important;
+    width:100%!important;
+    height:100dvh!important;
+    min-height:100dvh!important;
+    padding:0!important;
+    margin:0!important;
+    place-items:stretch!important;
+    align-items:stretch!important;
+    justify-items:stretch!important;
+    overflow:hidden!important;
+  }
+
+  .mobile-fullscreen-modal,
+  .record-action-modal,
+  .record-editor-modal,
+  .relation-picker-modal,
+  .product-document-modal{
+    width:100%!important;
+    max-width:none!important;
+    height:100%!important;
+    min-height:0!important;
+    max-height:none!important;
+    margin:0!important;
+    border-radius:0!important;
+    border-left:0!important;
+    border-right:0!important;
+    border-top:0!important;
+    border-bottom:0!important;
+    box-shadow:none!important;
+  }
+
+  .mobile-fullscreen-modal{
+    display:flex!important;
+    flex-direction:column!important;
+    overflow:hidden!important;
+  }
+
+  .mobile-fullscreen-modal>.modal-head,
+  .record-detail-head,
+  .relation-picker-modal>.modal-head,
+  .product-document-modal-head{
+    flex:0 0 auto!important;
+    padding-top:calc(14px + env(safe-area-inset-top))!important;
+  }
+
+  .database-switch-modal .database-switch-form{
+    flex:1 1 auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    overflow-y:auto!important;
+    overscroll-behavior:contain!important;
+    -webkit-overflow-scrolling:touch!important;
+    padding:16px 16px calc(18px + env(safe-area-inset-bottom))!important;
+  }
+
+  .database-switch-modal .modal-actions{
+    padding-bottom:max(2px,env(safe-area-inset-bottom))!important;
+  }
+
+  .user-access-modal .user-access-form,
+  .record-action-modal,
+  .readable-record-view,
+  .record-edit-fields,
+  .relation-picker-list,
+  .product-document-modal-body{
+    -webkit-overflow-scrolling:touch!important;
+    overscroll-behavior:contain!important;
+  }
+
+  .record-editor-actions,
+  .relation-picker-actions,
+  .product-document-modal-footer{
+    padding-bottom:calc(12px + env(safe-area-inset-bottom))!important;
+  }
+
+  /* Keep centered dialogs centered: confirmations and compact CRUD dialogs
+     intentionally remain cards rather than accidental fullscreen surfaces. */
+  .confirm-backdrop:not(.mobile-fullscreen-backdrop){
+    padding:16px!important;
+    place-items:center!important;
+    overflow:auto!important;
+  }
+}
+
+/* Fullscreen file preview follows the same dynamic viewport contract. */
+@media(max-width:720px){
+  .drive-preview{
+    width:100%!important;
+    height:100dvh!important;
+    min-height:100dvh!important;
+    grid-template-rows:calc(60px + env(safe-area-inset-top)) minmax(0,1fr) calc(34px + env(safe-area-inset-bottom))!important;
+  }
+  .drive-preview-topbar{
+    height:calc(60px + env(safe-area-inset-top))!important;
+    padding:env(safe-area-inset-top) max(10px,env(safe-area-inset-right)) 0 max(10px,env(safe-area-inset-left))!important;
+  }
+  .drive-preview-stage>img,
+  .drive-preview-stage>video{max-height:calc(100dvh - 128px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important}
+  .drive-preview-stage>iframe{height:calc(100dvh - 132px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important}
+  .drive-preview-footer{height:calc(34px + env(safe-area-inset-bottom))!important;padding-bottom:env(safe-area-inset-bottom)!important}
+}

@@ -6,8 +6,37 @@ if (isset($_GET['logout'])) {
     Auth::logout();
 }
 
-$installError = null;
-$loginError = null;
+$installFlash = $_SESSION['_matercms_install_flash'] ?? null;
+unset($_SESSION['_matercms_install_flash']);
+$installError = is_array($installFlash) ? (string)($installFlash['error'] ?? '') : null;
+$installError = $installError !== '' ? $installError : null;
+$installOld = is_array($installFlash) && is_array($installFlash['old'] ?? null) ? $installFlash['old'] : [];
+$loginError = isset($_SESSION['_matercms_login_error']) ? (string)$_SESSION['_matercms_login_error'] : null;
+unset($_SESSION['_matercms_login_error']);
+
+function matercms_redirect_get(): never
+{
+    $requestUri = (string)($_SERVER['REQUEST_URI'] ?? '/');
+    $path = (string)(parse_url($requestUri, PHP_URL_PATH) ?: '/');
+    header('Location: ' . $path, true, 303);
+    exit;
+}
+
+function matercms_install_old(array $source): array
+{
+    $allowed = ['db_driver','db_input_mode','db_host','db_port','db_name','db_user','db_sslmode','name','email'];
+    $old = [];
+    foreach ($allowed as $key) {
+        if (isset($source[$key]) && is_scalar($source[$key])) $old[$key] = (string)$source[$key];
+    }
+    return $old;
+}
+
+function matercms_install_flash(string $message, array $old = []): never
+{
+    $_SESSION['_matercms_install_flash'] = ['error'=>$message,'old'=>$old];
+    matercms_redirect_get();
+}
 
 function install_matercms(string $name, string $email, string $password): int
 {
@@ -101,8 +130,9 @@ if (!Database::installed()) {
                 $databaseConfig = Database::configurationFromInput($_POST);
                 Database::testConfiguration($databaseConfig);
                 Database::saveConfiguration($databaseConfig);
+                matercms_redirect_get();
             } catch (Throwable $e) {
-                $installError = 'Не удалось подключиться к базе: ' . $e->getMessage();
+                matercms_install_flash('Не удалось подключиться к базе: ' . $e->getMessage(), matercms_install_old($_POST));
             }
         }
 
@@ -115,8 +145,9 @@ if (!Database::installed()) {
                     if ($path !== '' && is_file($path)) @unlink($path);
                 }
                 Database::resetConfiguration();
+                matercms_redirect_get();
             } catch (Throwable $e) {
-                $installError = 'Не удалось изменить конфигурацию: ' . $e->getMessage();
+                matercms_install_flash('Не удалось изменить конфигурацию: ' . $e->getMessage());
             }
         }
 
@@ -125,23 +156,30 @@ if (!Database::installed()) {
             $name = trim((string)($_POST['name'] ?? 'Администратор'));
             $email = mb_strtolower(trim((string)($_POST['email'] ?? '')));
             $password = (string)($_POST['password'] ?? '');
+            $old = matercms_install_old($_POST);
 
             if (!Database::hasConfiguration() && !Database::hasLegacySqlite()) {
-                $installError = 'Сначала выберите и проверьте базу данных.';
-            } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $installError = 'Укажите корректный email.';
-            } elseif (strlen($password) < 8) {
-                $installError = 'Пароль должен содержать минимум 8 символов.';
-            } else {
-                try {
-                    $userId = install_matercms($name, $email, $password);
-                    session_regenerate_id(true);
-                    $_SESSION['user_id'] = $userId;
-                } catch (Throwable $e) {
-                    $installError = 'Не удалось установить CMS: ' . $e->getMessage();
-                }
+                matercms_install_flash('Сначала выберите и проверьте базу данных.', $old);
+            }
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                matercms_install_flash('Укажите корректный email.', $old);
+            }
+            if (strlen($password) < 8) {
+                matercms_install_flash('Пароль должен содержать минимум 8 символов.', $old);
+            }
+
+            try {
+                $userId = install_matercms($name, $email, $password);
+                session_regenerate_id(true);
+                $_SESSION['user_id'] = $userId;
+                matercms_redirect_get();
+            } catch (Throwable $e) {
+                matercms_install_flash('Не удалось установить CMS: ' . $e->getMessage(), $old);
             }
         }
+
+        // Unknown POSTs must not leave the browser on a POST response.
+        matercms_redirect_get();
     }
 
     if (!Database::installed()) {
@@ -151,7 +189,7 @@ if (!Database::installed()) {
         if ($databaseSelectionSaved && !$databaseConfigured && !$installError) {
             $installError = 'Сохранённая база сейчас недоступна. Проверьте соединение или выберите другую СУБД.';
         }
-        $selectedDriver = (string)($_POST['db_driver'] ?? ($databaseInfo['driver'] ?? 'sqlite'));
+        $selectedDriver = (string)($installOld['db_driver'] ?? ($databaseInfo['driver'] ?? 'sqlite'));
         if (!isset($databaseAvailability[$selectedDriver]) || empty($databaseAvailability[$selectedDriver]['available'])) {
             foreach ($databaseAvailability as $candidate => $meta) {
                 if (!empty($meta['available'])) { $selectedDriver = $candidate; break; }
@@ -213,22 +251,22 @@ if (!Database::installed()) {
                   <div class="database-config-head">
                     <div><small>ПОДКЛЮЧЕНИЕ</small><h2>MySQL / PostgreSQL</h2><p>Можно заполнить обычные поля или вставить единый URL подключения.</p></div>
                     <div class="database-input-mode">
-                      <label><input type="radio" name="db_input_mode" value="url" <?=($_POST['db_input_mode']??'url')!=='fields'?'checked':''?>><span>URL</span></label>
-                      <label><input type="radio" name="db_input_mode" value="fields" <?=($_POST['db_input_mode']??'')==='fields'?'checked':''?>><span>Поля</span></label>
+                      <label><input type="radio" name="db_input_mode" value="url" <?=($installOld['db_input_mode']??'url')!=='fields'?'checked':''?>><span>URL</span></label>
+                      <label><input type="radio" name="db_input_mode" value="fields" <?=($installOld['db_input_mode']??'')==='fields'?'checked':''?>><span>Поля</span></label>
                     </div>
                   </div>
                   <div class="db-mode-fields" data-db-mode="fields">
                     <div class="installer-field-grid">
-                      <label>Хост<input name="db_host" value="<?=e($_POST['db_host']??'127.0.0.1')?>" autocomplete="off"></label>
-                      <label>Порт<input name="db_port" inputmode="numeric" value="<?=e($_POST['db_port']??'')?>" placeholder="Автоматически"></label>
-                      <label class="span-2">База данных<input name="db_name" value="<?=e($_POST['db_name']??'')?>" autocomplete="off" placeholder="matercms"></label>
-                      <label>Пользователь<input name="db_user" value="<?=e($_POST['db_user']??'')?>" autocomplete="username"></label>
+                      <label>Хост<input name="db_host" value="<?=e($installOld['db_host']??'127.0.0.1')?>" autocomplete="off"></label>
+                      <label>Порт<input name="db_port" inputmode="numeric" value="<?=e($installOld['db_port']??'')?>" placeholder="Автоматически"></label>
+                      <label class="span-2">База данных<input name="db_name" value="<?=e($installOld['db_name']??'')?>" autocomplete="off" placeholder="matercms"></label>
+                      <label>Пользователь<input name="db_user" value="<?=e($installOld['db_user']??'')?>" autocomplete="username"></label>
                       <label>Пароль<div class="password-control"><input data-password-input type="password" name="db_password" autocomplete="new-password"><button class="password-toggle" data-password-toggle type="button" aria-label="Показать пароль" aria-pressed="false" title="Показать пароль"><i class="bi bi-eye"></i></button></div></label>
                     </div>
                     <label class="pgsql-ssl-field">SSL PostgreSQL<select name="db_sslmode"><option value="prefer">Prefer</option><option value="require">Require</option><option value="disable">Disable</option></select></label>
                   </div>
                   <div class="db-mode-url" data-db-mode="url">
-                    <label>URL подключения<input name="db_url" value="<?=e($_POST['db_url']??'')?>" autocomplete="off" placeholder="mysql://user:password@host:3306/database"></label>
+                    <label>URL подключения<input name="db_url" value="" autocomplete="off" placeholder="mysql://user:password@host:3306/database"></label>
                     <small>Примеры: <code>mysql://user:pass@host:3306/db</code> или <code>postgresql://user:pass@host:5432/db?sslmode=require</code></small>
                   </div>
                 </div>
@@ -250,8 +288,8 @@ if (!Database::installed()) {
               <form method="post" class="installer-admin-form">
                 <?=csrf_field()?><input type="hidden" name="action" value="install">
                 <div class="installer-field-grid">
-                  <label class="span-2">Ваше имя<input name="name" required value="<?=e($_POST['name']??'Администратор')?>" autocomplete="name"></label>
-                  <label class="span-2">Email<input type="email" name="email" required value="<?=e($_POST['email']??'')?>" autocomplete="email"></label>
+                  <label class="span-2">Ваше имя<input name="name" required value="<?=e($installOld['name']??'Администратор')?>" autocomplete="name"></label>
+                  <label class="span-2">Email<input type="email" name="email" required value="<?=e($installOld['email']??'')?>" autocomplete="email"></label>
                   <label class="span-2">Пароль<div class="password-control"><input data-password-input type="password" name="password" minlength="8" required placeholder="Минимум 8 символов" autocomplete="new-password"><button class="password-toggle" data-password-toggle type="button" aria-label="Показать пароль" aria-pressed="false" title="Показать пароль"><i class="bi bi-eye"></i></button></div></label>
                 </div>
                 <button class="button primary installer-primary" type="submit"><i class="bi bi-stars"></i> Установить MaterCMS</button>
@@ -282,10 +320,10 @@ if (!$user) {
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'login') {
         verify_csrf();
         if (Auth::attempt((string)($_POST['email'] ?? ''), (string)($_POST['password'] ?? ''))) {
-            $user = Auth::user();
-        } else {
-            $loginError = 'Неверный email или пароль.';
+            matercms_redirect_get();
         }
+        $_SESSION['_matercms_login_error'] = 'Неверный email или пароль.';
+        matercms_redirect_get();
     }
 
     if (!$user) {
@@ -1757,8 +1795,8 @@ $config = [
     </section>
   </div>
 
-  <div v-if="modal" class="modal-backdrop" :class="{'user-access-backdrop':modal==='create-user' || modal==='edit-user'}" @mousedown.self="(modal==='api-token' || (modal==='database-switch' && databaseSwitching)) ? null : (modal=null)">
-    <section class="modal-card" :class="{'database-switch-modal':modal==='database-switch','user-access-modal':modal==='create-user' || modal==='edit-user','content-properties-card':modal==='content-properties'}">
+  <div v-if="modal" class="modal-backdrop" :class="{'user-access-backdrop':modal==='create-user' || modal==='edit-user','mobile-fullscreen-backdrop':modal==='database-switch' || modal==='create-user' || modal==='edit-user'}" @mousedown.self="(modal==='api-token' || (modal==='database-switch' && databaseSwitching)) ? null : (modal=null)">
+    <section class="modal-card" :class="{'database-switch-modal':modal==='database-switch','user-access-modal':modal==='create-user' || modal==='edit-user','mobile-fullscreen-modal':modal==='database-switch' || modal==='create-user' || modal==='edit-user','content-properties-card':modal==='content-properties'}">
       <div class="modal-head"><div><small class="eyebrow">{{ modalEyebrow }}</small><h2>{{ modalTitle }}</h2></div><button type="button" class="close-button" :disabled="modal==='database-switch' && databaseSwitching" @click="modal==='api-token' ? closeApiSecret() : ((modal==='database-switch' && databaseSwitching) ? null : (modal=null))"><i class="bi bi-x-lg"></i></button></div>
       <div v-if="modal==='api-token'" class="api-secret-modal-body">
         <div class="secret-created-icon"><i class="bi bi-shield-lock"></i></div>
