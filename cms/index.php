@@ -347,7 +347,7 @@ if (!$user) {
             </section>
             <section class="auth-login-panel">
               <div class="auth-mobile-brand auth-brand-wordmark"><span class="brand-wordmark"><img class="logo-light" src="<?=e(asset_url('assets/branding/matercms-wordmark-light.webp'))?>" alt="MaterCMS"><img class="logo-dark" src="<?=e(asset_url('assets/branding/matercms-wordmark-dark.webp'))?>" alt="MaterCMS"></span><div class="sr-only-brand"><strong>MaterCMS</strong><small>Контент без лишнего</small></div></div>
-              <div class="auth-login-head"><small>ВХОД В MATER</small><h2>С возвращением</h2><p>Продолжите работу с вашим контентом.</p></div>
+              <div class="auth-login-head"><small>ВХОД В MATERCMS</small><h2>С возвращением</h2><p>Продолжите работу с вашим контентом.</p></div>
               <?php if($loginError):?><div class="auth-error"><i class="bi bi-exclamation-circle"></i><span><?=e($loginError)?></span></div><?php endif;?>
               <form method="post" class="auth-form"><?=csrf_field()?><input type="hidden" name="action" value="login">
                 <label><span>Email</span><div class="auth-input-wrap"><i class="bi bi-envelope"></i><input type="email" name="email" required autofocus autocomplete="email" placeholder="name@example.com"></div></label>

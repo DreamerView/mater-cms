@@ -1,1 +1,1 @@
-fix(mobile): stop iOS input zoom, resubmits and fullscreen modal overflow
+fix(auth): polish desktop login balance and remove duplicate wordmark

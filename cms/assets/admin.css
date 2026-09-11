@@ -7705,3 +7705,521 @@ body.matercms-modal-open{
   .drive-preview-stage>iframe{height:calc(100dvh - 132px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important}
   .drive-preview-footer{height:calc(34px + env(safe-area-inset-bottom))!important;padding-bottom:env(safe-area-inset-bottom)!important}
 }
+
+
+/* ========================================================================== 
+   v2026.09.11.17 — authentication responsive completion
+   ========================================================================== */
+/*
+   The login screen is intentionally normalized here as the final auth layer.
+   Earlier auth experiments remain untouched for backwards traceability, while
+   this block owns the final geometry on desktop, laptop, tablet and phone.
+*/
+.auth-body{
+  width:100%;
+  min-width:0;
+  min-height:100dvh!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden;
+  background:#fff!important;
+}
+.auth-shell{
+  width:100%!important;
+  max-width:none!important;
+  height:100dvh!important;
+  min-height:100dvh!important;
+  margin:0!important;
+  display:grid!important;
+  grid-template-columns:minmax(320px,40%) minmax(0,60%)!important;
+  align-items:stretch!important;
+  overflow:hidden!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  background:#fff!important;
+}
+.auth-product-panel{
+  position:relative!important;
+  inset:auto!important;
+  width:100%!important;
+  min-width:0!important;
+  height:100dvh!important;
+  min-height:100dvh!important;
+  padding:clamp(30px,3.6vw,58px)!important;
+  overflow:hidden!important;
+  display:flex!important;
+  flex-direction:column!important;
+  background:#f6f7f9!important;
+  border-right:1px solid #e7ebf0!important;
+}
+.auth-product-panel .auth-brand{
+  flex:0 0 auto;
+}
+.auth-product-copy{
+  width:100%;
+  max-width:560px!important;
+  margin:auto 0!important;
+}
+.auth-product-copy h1{
+  max-width:540px!important;
+  font-size:clamp(39px,4vw,62px)!important;
+  line-height:.98!important;
+}
+.auth-product-copy p{
+  max-width:470px!important;
+  font-size:clamp(11px,1vw,13px)!important;
+}
+.auth-feature-list,
+.auth-product-foot{
+  flex:0 0 auto;
+}
+.auth-login-panel{
+  width:100%!important;
+  min-width:0!important;
+  height:100dvh!important;
+  min-height:0!important;
+  padding:clamp(32px,5vh,68px) clamp(36px,7vw,108px)!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior-y:contain;
+  -webkit-overflow-scrolling:touch;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+  align-items:center!important;
+  background:#fff!important;
+}
+.auth-login-panel>*{
+  width:min(500px,100%)!important;
+  max-width:500px!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+}
+.auth-mobile-brand{
+  display:none!important;
+}
+.auth-login-head{
+  margin-top:0!important;
+  margin-bottom:28px!important;
+}
+.auth-login-head h2{
+  font-size:clamp(32px,3vw,40px)!important;
+  line-height:1.04!important;
+  text-wrap:balance;
+}
+.auth-login-head p{
+  max-width:430px;
+  line-height:1.55;
+}
+.auth-login-panel .auth-form{
+  gap:18px!important;
+}
+.auth-login-panel .auth-form label{
+  min-width:0;
+}
+.auth-input-wrap{
+  width:100%;
+  min-width:0;
+  height:52px!important;
+}
+.auth-input-wrap input{
+  min-width:0;
+  height:50px!important;
+  text-overflow:ellipsis;
+}
+.auth-submit{
+  width:100%!important;
+  min-height:52px!important;
+  height:52px!important;
+  margin-top:5px!important;
+}
+.auth-login-note{
+  width:100%!important;
+  margin-top:24px!important;
+  padding-top:18px!important;
+}
+
+/* Medium desktop / classic laptop. Keep both surfaces, but never squeeze the form. */
+@media (min-width:961px) and (max-width:1240px){
+  .auth-shell{
+    grid-template-columns:minmax(300px,36%) minmax(0,64%)!important;
+  }
+  .auth-product-panel{
+    padding:clamp(28px,3vw,42px)!important;
+  }
+  .auth-product-copy h1{
+    font-size:clamp(36px,4.2vw,50px)!important;
+  }
+  .auth-feature-list{
+    gap:6px!important;
+  }
+  .auth-feature-list span{
+    height:32px;
+    padding:0 8px;
+  }
+  .auth-login-panel{
+    padding-left:clamp(34px,5vw,64px)!important;
+    padding-right:clamp(34px,5vw,64px)!important;
+  }
+}
+
+/* Short desktop/laptop screens must scroll the form instead of cropping it. */
+@media (min-width:961px) and (max-height:700px){
+  .auth-product-panel{
+    padding-top:26px!important;
+    padding-bottom:26px!important;
+  }
+  .auth-product-copy h1{
+    font-size:clamp(34px,4.2vw,48px)!important;
+    margin-top:14px!important;
+  }
+  .auth-feature-list{
+    margin-top:20px!important;
+  }
+  .auth-product-foot{
+    margin-top:18px!important;
+  }
+  .auth-login-panel{
+    justify-content:flex-start!important;
+    padding-top:32px!important;
+    padding-bottom:32px!important;
+  }
+}
+
+/* Tablet and compact windows: switch to one intentional column. */
+@media (max-width:960px){
+  html:has(.auth-body){
+    width:100%;
+    min-height:100%;
+    overflow-x:hidden!important;
+    background:#fff!important;
+  }
+  .auth-body{
+    height:auto!important;
+    min-height:100dvh!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+  }
+  .auth-shell{
+    width:100%!important;
+    height:auto!important;
+    min-height:100dvh!important;
+    display:block!important;
+    overflow:visible!important;
+  }
+  .auth-product-panel{
+    display:none!important;
+  }
+  .auth-login-panel{
+    width:100%!important;
+    height:auto!important;
+    min-height:100dvh!important;
+    padding:0 clamp(24px,6vw,56px) calc(28px + env(safe-area-inset-bottom))!important;
+    overflow:visible!important;
+    display:flex!important;
+    flex-direction:column!important;
+    justify-content:flex-start!important;
+    align-items:stretch!important;
+  }
+  .auth-login-panel>*{
+    width:min(560px,100%)!important;
+    max-width:560px!important;
+    margin-left:auto!important;
+    margin-right:auto!important;
+  }
+  .auth-mobile-brand{
+    position:sticky!important;
+    top:0!important;
+    z-index:10!important;
+    box-sizing:border-box!important;
+    width:calc(100% + (2 * clamp(24px,6vw,56px)))!important;
+    max-width:none!important;
+    min-height:82px!important;
+    margin:0 calc(-1 * clamp(24px,6vw,56px))!important;
+    padding:calc(16px + env(safe-area-inset-top)) clamp(24px,6vw,56px) 15px!important;
+    display:flex!important;
+    align-items:center!important;
+    background:rgba(255,255,255,.94)!important;
+    border-bottom:1px solid rgba(229,233,239,.92)!important;
+    backdrop-filter:blur(18px) saturate(150%);
+    -webkit-backdrop-filter:blur(18px) saturate(150%);
+  }
+  .auth-mobile-brand .brand-wordmark img{
+    height:32px!important;
+  }
+  .auth-login-head{
+    margin-top:clamp(42px,8vh,72px)!important;
+    margin-bottom:26px!important;
+  }
+  .auth-login-head h2{
+    font-size:clamp(32px,6vw,40px)!important;
+  }
+  .auth-login-head p{
+    font-size:12px!important;
+  }
+  .auth-login-note{
+    margin-top:28px!important;
+    padding-bottom:4px!important;
+  }
+}
+
+/* Phones: preserve readable 16px controls and safe-area spacing. */
+@media (max-width:560px){
+  .auth-login-panel{
+    padding-left:18px!important;
+    padding-right:18px!important;
+  }
+  .auth-login-panel>*{
+    width:100%!important;
+    max-width:100%!important;
+  }
+  .auth-mobile-brand{
+    width:calc(100% + 36px)!important;
+    min-height:76px!important;
+    margin-left:-18px!important;
+    margin-right:-18px!important;
+    padding-left:18px!important;
+    padding-right:18px!important;
+  }
+  .auth-mobile-brand .brand-wordmark img{
+    height:30px!important;
+  }
+  .auth-login-head{
+    margin-top:34px!important;
+    margin-bottom:24px!important;
+  }
+  .auth-login-head>small{
+    margin-bottom:8px!important;
+  }
+  .auth-login-head h2{
+    font-size:clamp(31px,9vw,36px)!important;
+    line-height:1.05!important;
+  }
+  .auth-login-head p{
+    margin-top:8px!important;
+    font-size:12px!important;
+  }
+  .auth-login-panel .auth-form{
+    gap:16px!important;
+  }
+  .auth-login-panel .auth-form label{
+    gap:8px!important;
+    font-size:11px!important;
+  }
+  .auth-input-wrap,
+  .auth-submit{
+    height:54px!important;
+  }
+  .auth-input-wrap input{
+    height:52px!important;
+    font-size:16px!important;
+  }
+  .auth-submit{
+    min-height:54px!important;
+    font-size:12px!important;
+  }
+  .auth-login-note{
+    margin-top:24px!important;
+    padding-top:17px!important;
+    font-size:10px!important;
+    line-height:1.55!important;
+  }
+}
+
+/* Very narrow phones: avoid forced wrapping/overflow around the title and icons. */
+@media (max-width:360px){
+  .auth-login-panel{
+    padding-left:14px!important;
+    padding-right:14px!important;
+  }
+  .auth-mobile-brand{
+    width:calc(100% + 28px)!important;
+    margin-left:-14px!important;
+    margin-right:-14px!important;
+    padding-left:14px!important;
+    padding-right:14px!important;
+  }
+  .auth-login-head{
+    margin-top:28px!important;
+  }
+  .auth-login-head h2{
+    font-size:29px!important;
+  }
+  .auth-input-wrap{
+    grid-template-columns:36px minmax(0,1fr)!important;
+  }
+  .auth-input-password{
+    grid-template-columns:36px minmax(0,1fr) 40px!important;
+  }
+  .auth-login-note{
+    gap:7px!important;
+    font-size:9.5px!important;
+  }
+}
+
+/* Landscape phones / short tablets: keep every control reachable above the keyboard. */
+@media (max-width:960px) and (max-height:620px){
+  .auth-mobile-brand{
+    position:relative!important;
+    min-height:68px!important;
+    padding-top:calc(10px + env(safe-area-inset-top))!important;
+    padding-bottom:10px!important;
+  }
+  .auth-mobile-brand .brand-wordmark img{
+    height:28px!important;
+  }
+  .auth-login-head{
+    margin-top:24px!important;
+    margin-bottom:20px!important;
+  }
+  .auth-login-head h2{
+    font-size:31px!important;
+  }
+  .auth-login-panel .auth-form{
+    gap:14px!important;
+  }
+  .auth-login-note{
+    margin-top:20px!important;
+    padding-bottom:calc(8px + env(safe-area-inset-bottom))!important;
+  }
+}
+
+/* Dark theme follows the same responsive geometry without flashing a light shell. */
+html[data-theme="dark"] .auth-body,
+html[data-theme="dark"] .auth-shell,
+html[data-theme="dark"] .auth-login-panel{
+  background:#111419!important;
+}
+html[data-theme="dark"] .auth-product-panel{
+  background:#15191f!important;
+  border-right-color:#2b313a!important;
+}
+html[data-theme="dark"] .auth-mobile-brand{
+  background:rgba(17,20,25,.94)!important;
+  border-bottom-color:rgba(48,54,64,.92)!important;
+}
+
+@media (prefers-reduced-motion:reduce){
+  .auth-mobile-brand{
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+  }
+}
+
+/* ========================================================================== 
+   v2026.09.11.18 — desktop authentication visual balance
+   ========================================================================== */
+/*
+   Desktop login polish.  This block deliberately has higher specificity than
+   the legacy wordmark rule so the compact/mobile logo can never leak into the
+   two-column desktop composition.
+*/
+@media (min-width:961px){
+  .auth-shell{
+    grid-template-columns:minmax(430px,42%) minmax(0,58%)!important;
+  }
+  .auth-product-panel{
+    padding:clamp(34px,3.8vw,60px)!important;
+  }
+  .auth-product-panel .auth-brand.auth-brand-wordmark{
+    margin:0!important;
+  }
+  .auth-product-copy{
+    max-width:500px!important;
+  }
+  .auth-product-copy h1{
+    max-width:500px!important;
+    margin:0 0 18px!important;
+    font-size:clamp(42px,3.65vw,58px)!important;
+    line-height:.98!important;
+    letter-spacing:-.058em!important;
+  }
+  .auth-product-copy p{
+    max-width:455px!important;
+    margin:0!important;
+    font-size:12px!important;
+    line-height:1.72!important;
+  }
+  .auth-product-foot{
+    display:block!important;
+    margin-top:auto!important;
+    color:#98a2b1!important;
+    font-size:9px!important;
+    letter-spacing:.01em;
+  }
+  .auth-login-panel{
+    padding-left:clamp(46px,6vw,96px)!important;
+    padding-right:clamp(46px,6vw,96px)!important;
+  }
+  .auth-login-panel>*{
+    width:min(460px,100%)!important;
+    max-width:460px!important;
+  }
+  .auth-login-panel>.auth-mobile-brand.auth-brand-wordmark{
+    display:none!important;
+  }
+  .auth-login-head{
+    margin-bottom:30px!important;
+  }
+  .auth-login-head>small{
+    margin-bottom:8px!important;
+    font-size:8px!important;
+    letter-spacing:.14em!important;
+  }
+  .auth-login-head h2{
+    font-size:clamp(34px,2.7vw,40px)!important;
+  }
+  .auth-login-head p{
+    margin-top:8px!important;
+    font-size:11.5px!important;
+  }
+  .auth-input-wrap{
+    border-radius:13px!important;
+  }
+  .auth-submit{
+    border-radius:13px!important;
+  }
+  .auth-login-note{
+    color:#929cab!important;
+  }
+}
+
+/* Windows 125% scaling commonly lands a 1920px display around 1536 physical
+   pixels / ~1229 CSS pixels. Keep that state visually balanced instead of
+   collapsing the product side to the old narrow 36% layout. */
+@media (min-width:961px) and (max-width:1240px){
+  .auth-shell{
+    grid-template-columns:minmax(405px,42%) minmax(0,58%)!important;
+  }
+  .auth-product-panel{
+    padding:clamp(32px,3.4vw,44px)!important;
+  }
+  .auth-product-copy h1{
+    font-size:clamp(38px,3.9vw,48px)!important;
+  }
+  .auth-product-copy p{
+    max-width:420px!important;
+  }
+  .auth-login-panel{
+    padding-left:clamp(38px,5vw,62px)!important;
+    padding-right:clamp(38px,5vw,62px)!important;
+  }
+  .auth-login-panel>*{
+    width:min(440px,100%)!important;
+    max-width:440px!important;
+  }
+}
+
+/* Mobile/tablet explicitly re-enables the compact brand after the stronger
+   desktop selector above. */
+@media (max-width:960px){
+  .auth-login-panel>.auth-mobile-brand.auth-brand-wordmark{
+    display:flex!important;
+  }
+}
+
+html[data-theme="dark"] .auth-product-foot{
+  color:#7f8999!important;
+}
+
