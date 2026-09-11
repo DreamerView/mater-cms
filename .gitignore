@@ -6,3 +6,9 @@
 
 # Разрешаем только CMS
 !/cms/
+
+# Разрешаем только MD
+!/README.md
+!/VERSION.md
+!/commit.md
+!/DOCUMENTATION.md 
